@@ -132,11 +132,14 @@
     .nav-links {
       display: flex; gap: 14px; align-items: center;
     }
-    /* Suppress any pseudo-element fill on regular nav links — only the CTA gets a fill */
-    .nav-links a:not(.nav-cta)::before {
+    /* No nav link should ever paint a fill/background — kill all pseudo fills. */
+    .nav-links a::before,
+    .nav-links a::after {
+      background-color: transparent;
+    }
+    .nav-links a::before {
       content: none !important;
       display: none !important;
-      background: transparent !important;
     }
     .nav-links a,
     .nav-links a:link,
@@ -170,36 +173,8 @@
     .nav-links a:focus-visible { color: var(--accent-primary); background: transparent !important; }
     .nav-links a:hover::after,
     .nav-links a:focus-visible::after { width: 100%; }
-    /* Keep the eBay CTA's intentional fill on hover, but lock its colors. */
-    .nav-links .nav-cta,
-    .nav-links .nav-cta:link,
-    .nav-links .nav-cta:visited { color: var(--accent-primary) !important; }
-    .nav-links .nav-cta:hover,
-    .nav-links .nav-cta:focus-visible { color: var(--bg-primary) !important; }
-    .nav-links .nav-cta {
-      padding: 8px 20px;
-      border: 1px solid var(--accent-primary);
-      border-radius: 6px; color: var(--accent-primary);
-      transition: all var(--transition);
-      position: relative;
-      overflow: hidden;
-    }
-    .nav-links .nav-cta::before {
-      content: '';
-      position: absolute; inset: 0;
-      background: var(--accent-primary);
-      transform: translateX(-100%);
-      transition: transform 0.35s ease;
-      z-index: -1;
-    }
-    .nav-links .nav-cta:hover {
-      color: var(--bg-primary);
-      box-shadow: 0 0 20px rgba(56,189,248,0.5);
-    }
-    .nav-links .nav-cta:hover::before {
-      transform: translateX(0);
-    }
-    .nav-links .nav-cta::after { display: none; }
+    /* eBay CTA now renders as a regular nav link — no border, no fill, no slider. */
+    .nav-links .nav-cta { padding: 8px 14px; }
 
     /* Mobile hamburger toggle */
     .nav-toggle {
