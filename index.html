@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Kyle D. Roberts | E-Commerce & Digital Marketing</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #fff;
+      color: #1e293b;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed; top: 0; width: 100%; z-index: 100;
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(8px);
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 18px 60px;
+    }
+    nav .logo {
+      color: #fff; font-size: 1.2rem; font-weight: 700; letter-spacing: 1px;
+    }
+    nav ul {
+      list-style: none; display: flex; gap: 32px;
+    }
+    nav ul a {
+      color: #cbd5e1; text-decoration: none; font-size: 0.9rem;
+      transition: color 0.2s;
+    }
+    nav ul a:hover { color: #38bdf8; }
+
+    /* HERO */
+    #hero {
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%);
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      text-align: center; padding: 100px 20px 60px;
+    }
+    #hero h1 {
+      font-size: 3.5rem; color: #fff; font-weight: 800;
+      line-height: 1.1; margin-bottom: 16px;
+    }
+    #hero h1 span { color: #38bdf8; }
+    #hero p.tagline {
+      font-size: 1.2rem; color: #94a3b8; max-width: 600px;
+      margin: 0 auto 36px;
+    }
+    .btn {
+      display: inline-block; padding: 14px 32px;
+      background: #38bdf8; color: #0f172a;
+      border-radius: 8px; text-decoration: none;
+      font-weight: 700; font-size: 0.95rem;
+      transition: background 0.2s, transform 0.2s;
+      margin: 6px;
+    }
+    .btn:hover { background: #7dd3fc; transform: translateY(-2px); }
+    .btn.outline {
+      background: transparent; color: #38bdf8;
+      border: 2px solid #38bdf8;
+    }
+    .btn.outline:hover { background: #38bdf8; color: #0f172a; }
+
+    /* SECTIONS */
+    section { padding: 90px 60px; max-width: 1100px; margin: 0 auto; }
+    section h2 {
+      font-size: 2rem; font-weight: 800; margin-bottom: 12px;
+      color: #0f172a;
+    }
+    .section-line {
+      width: 50px; height: 4px; background: #38bdf8;
+      border-radius: 2px; margin-bottom: 40px;
+    }
+
+    /* ABOUT */
+    #about p {
+      font-size: 1.05rem; color: #475569; line-height: 1.8;
+      max-width: 780px;
+    }
+
+    /* SKILLS */
+    #skills { background: #f8fafc; max-width: 100%; padding: 90px 60px; }
+    #skills .inner { max-width: 1100px; margin: 0 auto; }
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 16px; margin-top: 0;
+    }
+    .skill-card {
+      background: #fff; border: 1px solid #e2e8f0;
+      border-radius: 10px; padding: 18px 20px;
+      font-size: 0.9rem; font-weight: 600; color: #1e293b;
+      text-align: center; box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    }
+    .skill-card span { display: block; font-size: 1.5rem; margin-bottom: 8px; }
+
+    /* EXPERIENCE */
+    .exp-item { margin-bottom: 44px; }
+    .exp-item h3 { font-size: 1.15rem; font-weight: 700; color: #0f172a; }
+    .exp-item .meta {
+      font-size: 0.875rem; color: #38bdf8; font-weight: 600;
+      margin: 4px 0 12px;
+    }
+    .exp-item ul { padding-left: 20px; }
+    .exp-item ul li {
+      font-size: 0.95rem; color: #475569;
+      line-height: 1.7; margin-bottom: 6px;
+    }
+
+    /* PROJECTS */
+    #projects { background: #f8fafc; max-width: 100%; padding: 90px 60px; }
+    #projects .inner { max-width: 1100px; margin: 0 auto; }
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 24px;
+    }
+    .project-card {
+      background: #fff; border-radius: 12px;
+      border: 1px solid #e2e8f0;
+      padding: 28px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .project-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+    }
+    .project-card h3 { font-size: 1.1rem; margin-bottom: 10px; }
+    .project-card p {
+      font-size: 0.9rem; color: #475569; line-height: 1.7; margin-bottom: 16px;
+    }
+    .project-card a {
+      font-size: 0.875rem; color: #38bdf8; font-weight: 600;
+      text-decoration: none;
+    }
+    .project-card a:hover { text-decoration: underline; }
+    .tag {
+      display: inline-block; background: #e0f2fe; color: #0369a1;
+      font-size: 0.75rem; font-weight: 600; padding: 3px 10px;
+      border-radius: 20px; margin: 3px 3px 12px 0;
+    }
+
+    /* CONTACT */
+    #contact { text-align: center; }
+    #contact p {
+      color: #475569; font-size: 1.05rem; margin-bottom: 32px;
+    }
+    .contact-links {
+      display: flex; justify-content: center;
+      gap: 16px; flex-wrap: wrap;
+    }
+
+    /* FOOTER */
+    footer {
+      background: #0f172a; color: #64748b;
+      text-align: center; padding: 28px;
+      font-size: 0.85rem;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 768px) {
+      nav { padding: 16px 24px; }
+      nav ul { gap: 16px; }
+      #hero h1 { font-size: 2.2rem; }
+      section { padding: 60px 24px; }
+      #skills, #projects { padding: 60px 24px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <div class="logo">KDR</div>
+    <ul>
+      <li><a href="#about">About</a></li>
+      <li><a href="#skills">Skills</a></li>
+      <li><a href="#experience">Experience</a></li>
+      <li><a href="#projects">Projects</a></li>
+      <li><a href="#contact">Contact</a></li>
+      <li><a href="ebay.html">eBay Store</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <section id="hero">
+    <div>
+      <h1>Kyle D. <span>Roberts</span></h1>
+      <p class="tagline">E-Commerce & Digital Marketing Professional specializing in Paid Media, Email Marketing, UX Optimization, and Reselling Marketplaces.</p>
+      <a href="#projects" class="btn">View My Work</a>
+      <a href="mailto:robertsdkyle@gmail.com" class="btn outline">Get In Touch</a>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section id="about">
+    <h2>About Me</h2>
+    <div class="section-line"></div>
+    <p>I'm an e-commerce and digital marketing professional with hands-on experience building and scaling online businesses. From managing paid media campaigns at a national brand to building a full Shopify storefront from the ground up, I bring a full-stack approach to digital commerce — combining strategy, execution, and analytics to drive real results. I'm also an active reseller across eBay and Facebook Marketplace, with deep knowledge of liquidation, auction formats, and multi-channel fulfillment.</p>
+  </section>
+
+  <!-- SKILLS -->
+  <div id="skills">
+    <div class="inner">
+      <h2>Skills</h2>
+      <div class="section-line"></div>
+      <div class="skills-grid">
+        <div class="skill-card"><span>📢</span>Paid Media (Meta & Google)</div>
+        <div class="skill-card"><span>📧</span>Email Marketing (Klaviyo)</div>
+        <div class="skill-card"><span>🛒</span>Shopify Development</div>
+        <div class="skill-card"><span>📦</span>eBay & Marketplace Ops</div>
+        <div class="skill-card"><span>🔍</span>SEO & Content Strategy</div>
+        <div class="skill-card"><span>📊</span>Google Analytics & Looker Studio</div>
+        <div class="skill-card"><span>🧪</span>A/B Testing & CRO</div>
+        <div class="skill-card"><span>📱</span>SMS Marketing</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EXPERIENCE -->
+  <section id="experience">
+    <h2>Experience</h2>
+    <div class="section-line"></div>
+
+    <div class="exp-item">
+      <h3>Webmaster — The Open Box / Long Island Liquidation</h3>
+      <div class="meta">May 2025 – Present · Hauppauge, NY</div>
+      <ul>
+        <li>Built and manage the Long Island Liquidation eCommerce site on Shopify, customized to support auctions, liquidation inventory, and hybrid pickup/shipping workflows.</li>
+        <li>Own the full auction system including bid structures, pricing experiments, and A/B testing of messaging and CTAs.</li>
+        <li>Manage end-to-end marketplace operations across the website, eBay, and Facebook Marketplace.</li>
+        <li>Lead all digital marketing — email campaigns, SMS, on-site banners, and social media.</li>
+        <li>Create SEO-focused content including product descriptions, meta tags, FAQs, and blog posts.</li>
+        <li>Analyze performance via Google Analytics to improve pricing, merchandising, and conversion.</li>
+      </ul>
+    </div>
+
+    <div class="exp-item">
+      <h3>Paid Media Manager — Bedgear</h3>
+      <div class="meta">October 2021 – November 2023 · Farmingdale, NY</div>
+      <ul>
+        <li>Developed and executed international paid media strategies across Meta and Google.</li>
+        <li>Built and optimized B2C email campaigns and automated flows using Klaviyo.</li>
+        <li>Executed A/B testing on creative assets and reported on KPIs including CAC, AOV, RO
