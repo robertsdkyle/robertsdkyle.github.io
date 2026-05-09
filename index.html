@@ -49,9 +49,7 @@
        CUSTOM CURSOR
        ===================== */
     @media (hover: hover) and (pointer: fine) {
-      body { cursor: none; }
-      a, button, .btn, .project-card, .skill-card, .contact-card,
-      .stat-card, .edu-card, .cert-item, input, textarea { cursor: none; }
+      html, body, *, *::before, *::after { cursor: none !important; }
       .cursor-dot,
       .cursor-ring {
         position: fixed;
@@ -76,9 +74,9 @@
                     border-color 0.25s ease, opacity 0.25s ease;
       }
       .cursor-ring.hover {
-        width: 56px; height: 56px;
-        border-color: rgba(56,189,248,0.9);
-        background: rgba(56,189,248,0.08);
+        width: 44px; height: 44px;
+        border-color: rgba(56,189,248,0.85);
+        background: transparent;
       }
     }
     @media (hover: none) {
@@ -158,6 +156,33 @@
       transform: translateX(0);
     }
     .nav-links .nav-cta::after { display: none; }
+
+    /* Mobile hamburger toggle */
+    .nav-toggle {
+      display: none;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      width: 42px; height: 42px;
+      padding: 0;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 5px;
+      transition: border-color var(--transition);
+    }
+    .nav-toggle:hover { border-color: var(--accent-primary); }
+    .nav-toggle span {
+      display: block;
+      width: 18px; height: 2px;
+      background: var(--text-primary);
+      border-radius: 2px;
+      transition: transform 0.35s ease, opacity 0.25s ease;
+      transform-origin: center;
+    }
+    .nav-toggle.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .nav-toggle.open span:nth-child(2) { opacity: 0; }
+    .nav-toggle.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
     /* =====================
        HERO
@@ -616,6 +641,13 @@
       border: 1px solid var(--border);
       transition: all var(--transition);
       position: relative;
+      aspect-ratio: 16 / 9;
+    }
+    .video-frame iframe {
+      width: 100%;
+      height: 100%;
+      display: block;
+      border: 0;
     }
     .video-frame:hover {
       border-color: rgba(56,189,248,0.4);
@@ -716,8 +748,18 @@
       box-shadow: 0 12px 40px rgba(56,189,248,0.18);
     }
     .contact-icon {
-      font-size: 1.4rem;
+      font-size: 1.5rem;
+      line-height: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       transition: transform var(--transition);
+    }
+    .contact-card > div {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      line-height: 1.35;
     }
     .contact-card:hover .contact-icon { transform: scale(1.15) rotate(-6deg); }
     .contact-label {
@@ -774,16 +816,77 @@
     /* =====================
        RESPONSIVE
        ===================== */
+    @media (max-width: 1024px) {
+      nav, nav.nav-scrolled { padding: 16px 32px; }
+      .nav-links { gap: 24px; }
+      .section, .section-full { padding: 90px 32px; }
+    }
     @media (max-width: 900px) {
-      .about-grid { grid-template-columns: 1fr; }
+      .about-grid { grid-template-columns: 1fr; gap: 40px; }
       .edu-grid { grid-template-columns: 1fr; }
+      .timeline-header { flex-direction: column; align-items: flex-start; }
     }
     @media (max-width: 768px) {
-      nav, nav.nav-scrolled { padding: 16px 24px; }
-      .nav-links { display: none; }
-      .section, .section-full { padding: 70px 24px; }
-      #hero h1 { font-size: 2.2rem; }
-      footer { flex-direction: column; text-align: center; }
+      nav, nav.nav-scrolled { padding: 14px 20px; }
+      .nav-toggle { display: flex; }
+      .nav-links {
+        position: fixed;
+        top: 0; right: 0;
+        width: min(280px, 80vw);
+        height: 100vh;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: flex-start;
+        padding: 90px 28px 32px;
+        gap: 22px;
+        background: rgba(10, 15, 30, 0.96);
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+        border-left: 1px solid var(--border);
+        transform: translateX(100%);
+        transition: transform 0.4s cubic-bezier(.4,0,.2,1);
+        z-index: 999;
+      }
+      .nav-links.open { transform: translateX(0); }
+      .nav-links li { width: 100%; }
+      .nav-links a { display: block; font-size: 1rem; padding: 6px 0; }
+      .nav-links .nav-cta { display: inline-block; margin-top: 8px; }
+
+      .section, .section-full { padding: 70px 20px; }
+      .section-header { margin-bottom: 40px; }
+      #hero { padding: 100px 20px 60px; }
+      #hero h1 { font-size: 2.4rem; }
+      .hero-tagline { font-size: 1rem; }
+      .hero-buttons { flex-direction: column; align-items: stretch; }
+      .hero-buttons .btn { justify-content: center; width: 100%; }
+
+      .about-stats { grid-template-columns: 1fr 1fr; gap: 14px; }
+      .stat-card { padding: 18px; }
+      .stat-number { font-size: 1.6rem; }
+
+      .skills-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+      .skill-card { padding: 16px; }
+
+      .projects-grid { grid-template-columns: 1fr; gap: 18px; }
+      .project-card { padding: 24px; }
+
+      .timeline { padding-left: 24px; }
+      .timeline-item::before { left: -30px; }
+
+      .certs-grid { grid-template-columns: 1fr; gap: 10px; }
+      .contact-card { width: 100%; padding: 20px 24px; }
+
+      footer {
+        flex-direction: column;
+        text-align: center;
+        padding: 28px 20px;
+      }
+      .footer-links { flex-wrap: wrap; justify-content: center; gap: 16px; }
+    }
+    @media (max-width: 420px) {
+      #hero h1 { font-size: 2rem; }
+      .skills-grid { grid-template-columns: 1fr; }
+      .about-stats { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -796,7 +899,10 @@
   <!-- ============ NAV ============ -->
   <nav id="main-nav">
     <div class="nav-logo">KDR</div>
-    <ul class="nav-links">
+    <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="nav-links" id="nav-links">
       <li><a href="#about">About</a></li>
       <li><a href="#skills">Skills</a></li>
       <li><a href="#experience">Experience</a></li>
@@ -1102,13 +1208,13 @@
       </div>
       <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:24px;">
         <div class="video-frame reveal">
-          <iframe width="100%" height="200" src="https://www.youtube.com/embed/l5mskpinJOE" frameborder="0" allowfullscreen></iframe>
+          <iframe loading="lazy" src="https://www.youtube.com/embed/l5mskpinJOE" frameborder="0" allowfullscreen></iframe>
         </div>
         <div class="video-frame reveal">
-          <iframe width="100%" height="200" src="https://www.youtube.com/embed/JcifMFLyvdw" frameborder="0" allowfullscreen></iframe>
+          <iframe loading="lazy" src="https://www.youtube.com/embed/JcifMFLyvdw" frameborder="0" allowfullscreen></iframe>
         </div>
         <div class="video-frame reveal">
-          <iframe width="100%" height="200" src="https://www.youtube.com/embed/KxpkV9iEHQw" frameborder="0" allowfullscreen></iframe>
+          <iframe loading="lazy" src="https://www.youtube.com/embed/KxpkV9iEHQw" frameborder="0" allowfullscreen></iframe>
         </div>
       </div>
 
@@ -1121,7 +1227,7 @@
         </div>
         <div style="max-width:720px;">
           <div class="video-frame reveal">
-            <iframe width="100%" height="400" src="https://www.youtube.com/embed/o7ILQU8KlEQ" frameborder="0" allowfullscreen></iframe>
+            <iframe loading="lazy" src="https://www.youtube.com/embed/o7ILQU8KlEQ" frameborder="0" allowfullscreen></iframe>
           </div>
         </div>
       </div>
@@ -1249,7 +1355,8 @@
         camera.position.z = 70;
 
         // PARTICLE FIELD
-        const particleCount = 1200;
+        const isMobile = window.innerWidth < 768;
+        const particleCount = isMobile ? 450 : 1200;
         const positions = new Float32Array(particleCount * 3);
         const speeds = new Float32Array(particleCount);
         for (let i = 0; i < particleCount; i++) {
@@ -1479,6 +1586,39 @@
         onScroll();
       }
 
+      /* Mobile menu toggle */
+      function initMobileMenu() {
+        const toggle = document.querySelector('.nav-toggle');
+        const links  = document.getElementById('nav-links');
+        if (!toggle || !links) return;
+
+        const close = () => {
+          toggle.classList.remove('open');
+          links.classList.remove('open');
+          toggle.setAttribute('aria-expanded', 'false');
+          document.body.style.overflow = '';
+        };
+        const open = () => {
+          toggle.classList.add('open');
+          links.classList.add('open');
+          toggle.setAttribute('aria-expanded', 'true');
+          document.body.style.overflow = 'hidden';
+        };
+
+        toggle.addEventListener('click', () => {
+          links.classList.contains('open') ? close() : open();
+        });
+        links.querySelectorAll('a').forEach((a) => {
+          a.addEventListener('click', close);
+        });
+        window.addEventListener('resize', () => {
+          if (window.innerWidth > 768) close();
+        });
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape') close();
+        });
+      }
+
       /* -------------------------------------------------
          5. CARD SPOTLIGHT (cursor-tracked glow)
          ------------------------------------------------- */
@@ -1546,6 +1686,7 @@
          ------------------------------------------------- */
       document.addEventListener('DOMContentLoaded', () => {
         initNavScroll();
+        initMobileMenu();
         initGSAP();
         initTilt();
         initCardSpotlight();
