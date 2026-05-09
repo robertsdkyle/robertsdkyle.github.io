@@ -35,6 +35,21 @@
        ===================== */
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
     html { scroll-behavior: smooth; }
+    /* Kill browser tap-highlights & default focus backgrounds */
+    a, button {
+      -webkit-tap-highlight-color: transparent;
+      background-color: transparent;
+    }
+    a:focus, button:focus { outline: none; }
+    a:focus-visible, button:focus-visible {
+      outline: 2px solid var(--accent-primary);
+      outline-offset: 4px;
+      border-radius: 4px;
+    }
+    ::selection {
+      background: rgba(56,189,248,0.35);
+      color: var(--text-primary);
+    }
     body {
       font-family: var(--font);
       background: var(--bg-primary);
@@ -1646,12 +1661,27 @@
 
         const pos = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
         const ringPos = { x: pos.x, y: pos.y };
+        let visible = true;
 
-        document.addEventListener('mousemove', (e) => {
+        const showCursor = () => {
+          if (visible) return;
+          visible = true;
+          dot.style.opacity = '1';
+          ring.style.opacity = '1';
+        };
+        const hideCursor = () => {
+          if (!visible) return;
+          visible = false;
+          dot.style.opacity = '0';
+          ring.style.opacity = '0';
+        };
+
+        document.addEventListener('pointermove', (e) => {
           pos.x = e.clientX;
           pos.y = e.clientY;
           dot.style.transform =
             `translate(${pos.x}px, ${pos.y}px) translate(-50%, -50%)`;
+          showCursor();
         });
 
         function loop() {
@@ -1664,21 +1694,25 @@
         loop();
 
         const hoverables = document.querySelectorAll(
-          'a, button, .btn, .project-card, .skill-card, .contact-card, .stat-card, .edu-card, .cert-item, iframe'
+          'a, button, .btn, .project-card, .skill-card, .contact-card, .stat-card, .edu-card, .cert-item'
         );
         hoverables.forEach((el) => {
-          el.addEventListener('mouseenter', () => ring.classList.add('hover'));
-          el.addEventListener('mouseleave', () => ring.classList.remove('hover'));
+          el.addEventListener('pointerenter', () => ring.classList.add('hover'));
+          el.addEventListener('pointerleave', () => ring.classList.remove('hover'));
         });
 
-        document.addEventListener('mouseleave', () => {
-          dot.style.opacity = '0';
-          ring.style.opacity = '0';
+        // Hide custom cursor over iframes (YouTube embeds) so the OS cursor
+        // can take over inside them, and we don't "leave behind" a frozen dot.
+        document.querySelectorAll('iframe').forEach((frame) => {
+          frame.addEventListener('pointerenter', hideCursor);
+          frame.addEventListener('mouseenter', hideCursor);
         });
-        document.addEventListener('mouseenter', () => {
-          dot.style.opacity = '1';
-          ring.style.opacity = '1';
-        });
+
+        // Detect when mouse leaves window OR enters any iframe (window blur fires).
+        window.addEventListener('blur', hideCursor);
+        window.addEventListener('focus', () => { /* re-show on next move */ });
+        document.addEventListener('mouseleave', hideCursor);
+        document.addEventListener('mouseenter', showCursor);
       }
 
       /* -------------------------------------------------
