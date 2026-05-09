@@ -5,17 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Kyle D. Roberts | E-Commerce & Digital Marketing</title>
 
-  <!--
-    FRAMEWORK NOTES FOR ENHANCEMENT:
-    - Replace #hero canvas with Three.js particle/wave background
-    - Add GSAP ScrollTrigger animations on [data-animate] elements
-    - Add Tilt.js or Vanilla-Tilt on .card elements for 3D hover effect
-    - Suggested libraries:
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/vanilla-tilt@1.7.0/dist/vanilla-tilt.min.js"></script>
-  -->
+  <!-- Animation libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vanilla-tilt@1.7.0/dist/vanilla-tilt.min.js"></script>
 
   <style>
     /* =====================
@@ -52,21 +46,75 @@
     ul { list-style: none; }
 
     /* =====================
+       CUSTOM CURSOR
+       ===================== */
+    @media (hover: hover) and (pointer: fine) {
+      body { cursor: none; }
+      a, button, .btn, .project-card, .skill-card, .contact-card,
+      .stat-card, .edu-card, .cert-item, input, textarea { cursor: none; }
+      .cursor-dot,
+      .cursor-ring {
+        position: fixed;
+        top: 0; left: 0;
+        pointer-events: none;
+        z-index: 9999;
+        transform: translate(-50%, -50%);
+        transition: opacity 0.25s ease;
+        will-change: transform;
+      }
+      .cursor-dot {
+        width: 8px; height: 8px;
+        background: var(--accent-primary);
+        border-radius: 50%;
+        box-shadow: 0 0 12px rgba(56,189,248,0.7);
+      }
+      .cursor-ring {
+        width: 36px; height: 36px;
+        border: 1.5px solid rgba(56,189,248,0.4);
+        border-radius: 50%;
+        transition: width 0.25s ease, height 0.25s ease,
+                    border-color 0.25s ease, opacity 0.25s ease;
+      }
+      .cursor-ring.hover {
+        width: 56px; height: 56px;
+        border-color: rgba(56,189,248,0.9);
+        background: rgba(56,189,248,0.08);
+      }
+    }
+    @media (hover: none) {
+      .cursor-dot, .cursor-ring { display: none; }
+    }
+
+    /* =====================
        NAVIGATION
        ===================== */
     nav {
       position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
       display: flex; justify-content: space-between; align-items: center;
       padding: 20px 60px;
-      background: rgba(10, 15, 30, 0.85);
-      backdrop-filter: blur(12px);
+      background: rgba(10, 15, 30, 0.4);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border-bottom: 1px solid transparent;
+      transition: padding 0.4s ease, background 0.4s ease,
+                  border-color 0.4s ease, backdrop-filter 0.4s ease,
+                  box-shadow 0.4s ease;
+      transform: translateY(-100%);
+      opacity: 0;
+    }
+    nav.nav-scrolled {
+      padding: 14px 60px;
+      background: rgba(10, 15, 30, 0.78);
+      backdrop-filter: blur(16px) saturate(160%);
+      -webkit-backdrop-filter: blur(16px) saturate(160%);
       border-bottom: 1px solid var(--border);
-      /* ANIMATE: fade in + slide down on load */
+      box-shadow: 0 10px 40px rgba(0,0,0,0.3);
     }
     .nav-logo {
       font-size: 1.4rem; font-weight: 800;
       color: var(--accent-primary);
       letter-spacing: 2px;
+      text-shadow: 0 0 20px rgba(56,189,248,0.4);
     }
     .nav-links {
       display: flex; gap: 36px; align-items: center;
@@ -81,6 +129,7 @@
       content: ''; position: absolute;
       bottom: -4px; left: 0; width: 0; height: 2px;
       background: var(--accent-primary);
+      box-shadow: 0 0 8px rgba(56,189,248,0.6);
       transition: width var(--transition);
     }
     .nav-links a:hover { color: var(--accent-primary); }
@@ -90,10 +139,23 @@
       border: 1px solid var(--accent-primary);
       border-radius: 6px; color: var(--accent-primary);
       transition: all var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+    .nav-links .nav-cta::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: var(--accent-primary);
+      transform: translateX(-100%);
+      transition: transform 0.35s ease;
+      z-index: -1;
     }
     .nav-links .nav-cta:hover {
-      background: var(--accent-primary);
       color: var(--bg-primary);
+      box-shadow: 0 0 20px rgba(56,189,248,0.5);
+    }
+    .nav-links .nav-cta:hover::before {
+      transform: translateX(0);
     }
     .nav-links .nav-cta::after { display: none; }
 
@@ -106,9 +168,14 @@
       text-align: center;
       padding: 120px 24px 60px;
       position: relative; overflow: hidden;
-      /* 3D HOOK: add Three.js canvas as absolute background here */
     }
-    /* Subtle grid background — replace with Three.js */
+    #hero-canvas {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      z-index: 0;
+      opacity: 0.85;
+    }
+    /* Subtle grid background overlay */
     #hero::before {
       content: '';
       position: absolute; inset: 0;
@@ -116,15 +183,20 @@
         linear-gradient(rgba(56,189,248,0.03) 1px, transparent 1px),
         linear-gradient(90deg, rgba(56,189,248,0.03) 1px, transparent 1px);
       background-size: 60px 60px;
+      z-index: 1;
+      pointer-events: none;
+      mask-image: radial-gradient(ellipse at center, #000 30%, transparent 80%);
+      -webkit-mask-image: radial-gradient(ellipse at center, #000 30%, transparent 80%);
     }
     #hero::after {
       content: '';
       position: absolute; inset: 0;
-      background: radial-gradient(ellipse at center, rgba(56,189,248,0.08) 0%, transparent 70%);
+      background: radial-gradient(ellipse at center, rgba(56,189,248,0.10) 0%, transparent 70%);
+      z-index: 1;
+      pointer-events: none;
     }
     .hero-content {
-      position: relative; z-index: 1;
-      /* ANIMATE: stagger children with GSAP on load */
+      position: relative; z-index: 2;
     }
     .hero-badge {
       display: inline-block;
@@ -135,25 +207,45 @@
       letter-spacing: 2px; text-transform: uppercase;
       margin-bottom: 24px;
       background: rgba(56,189,248,0.05);
-      /* ANIMATE: fade in first */
+      position: relative;
+    }
+    .hero-badge::before {
+      content: '';
+      position: absolute;
+      left: 12px; top: 50%;
+      width: 6px; height: 6px;
+      background: #4ade80;
+      border-radius: 50%;
+      box-shadow: 0 0 10px #4ade80;
+      animation: pulse-dot 2s ease-in-out infinite;
+      transform: translateY(-50%);
+      display: none; /* enable by adding padding-left */
+    }
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: translateY(-50%) scale(1); }
+      50% { opacity: 0.5; transform: translateY(-50%) scale(1.3); }
     }
     #hero h1 {
       font-size: clamp(2.5rem, 6vw, 5rem);
       font-weight: 900; line-height: 1.05;
       margin-bottom: 24px;
-      /* ANIMATE: slide up */
     }
     #hero h1 .name-highlight {
       background: linear-gradient(135deg, var(--accent-primary), #818cf8);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
+      animation: glow-pulse 3.5s ease-in-out infinite;
+      filter: drop-shadow(0 0 20px rgba(56,189,248,0.4));
+    }
+    @keyframes glow-pulse {
+      0%, 100% { filter: drop-shadow(0 0 12px rgba(56,189,248,0.3)); }
+      50%      { filter: drop-shadow(0 0 28px rgba(129,140,248,0.55)); }
     }
     .hero-tagline {
       font-size: clamp(1rem, 2vw, 1.2rem);
       color: var(--text-secondary);
       max-width: 620px; margin: 0 auto 40px;
-      /* ANIMATE: slide up, slight delay */
     }
     .hero-tags {
       display: flex; flex-wrap: wrap;
@@ -166,6 +258,13 @@
       border: 1px solid rgba(56,189,248,0.2);
       border-radius: 20px;
       font-size: 0.8rem; color: var(--text-secondary);
+      transition: all var(--transition);
+    }
+    .hero-tag:hover {
+      background: rgba(56,189,248,0.18);
+      border-color: rgba(56,189,248,0.5);
+      color: var(--text-primary);
+      transform: translateY(-2px);
     }
     .hero-buttons {
       display: flex; gap: 16px;
@@ -176,33 +275,70 @@
       font-weight: 700; font-size: 0.95rem;
       cursor: pointer; transition: all var(--transition);
       display: inline-flex; align-items: center; gap: 8px;
+      position: relative;
+      overflow: hidden;
+      isolation: isolate;
     }
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%;
+      width: 100%; height: 100%;
+      background: linear-gradient(120deg,
+        transparent 0%,
+        rgba(255,255,255,0.25) 50%,
+        transparent 100%);
+      transition: left 0.6s ease;
+      z-index: -1;
+    }
+    .btn:hover::before { left: 100%; }
     .btn-primary {
       background: var(--accent-primary); color: var(--bg-primary);
       box-shadow: 0 0 20px rgba(56,189,248,0.3);
     }
     .btn-primary:hover {
       transform: translateY(-2px);
-      box-shadow: 0 0 40px rgba(56,189,248,0.5);
+      box-shadow: 0 8px 40px rgba(56,189,248,0.55);
     }
     .btn-outline {
       border: 1px solid var(--border); color: var(--text-primary);
+      background: rgba(255,255,255,0.02);
     }
     .btn-outline:hover {
       border-color: var(--accent-primary);
       color: var(--accent-primary);
       transform: translateY(-2px);
+      box-shadow: 0 0 25px rgba(56,189,248,0.2);
     }
     .hero-scroll {
       position: absolute; bottom: 36px; left: 50%; transform: translateX(-50%);
       color: var(--text-muted); font-size: 0.75rem;
       letter-spacing: 2px; text-transform: uppercase;
       display: flex; flex-direction: column; align-items: center; gap: 8px;
-      /* ANIMATE: bounce arrow */
+      z-index: 2;
+      animation: bounce-scroll 2.4s ease-in-out infinite;
+    }
+    @keyframes bounce-scroll {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50%      { transform: translateX(-50%) translateY(8px); }
     }
     .scroll-arrow {
       width: 1px; height: 40px;
       background: linear-gradient(to bottom, var(--accent-primary), transparent);
+      position: relative;
+      overflow: hidden;
+    }
+    .scroll-arrow::after {
+      content: '';
+      position: absolute;
+      top: -40px; left: 0;
+      width: 100%; height: 40px;
+      background: linear-gradient(to bottom, transparent, var(--accent-primary));
+      animation: scroll-line 2s linear infinite;
+    }
+    @keyframes scroll-line {
+      0%   { top: -40px; }
+      100% { top: 40px; }
     }
 
     /* =====================
@@ -215,6 +351,7 @@
     .section-full {
       padding: 100px 60px;
       background: var(--bg-secondary);
+      position: relative;
     }
     .section-full .inner { max-width: 1100px; margin: 0 auto; }
     .section-header { margin-bottom: 56px; }
@@ -254,16 +391,32 @@
       border: 1px solid var(--border);
       border-radius: var(--radius); padding: 24px;
       text-align: center;
-      transition: border-color var(--transition), transform var(--transition);
-      /* 3D HOOK: add Vanilla-Tilt here */
+      transition: border-color var(--transition),
+                  transform var(--transition),
+                  box-shadow var(--transition);
+      transform-style: preserve-3d;
+      position: relative;
+      overflow: hidden;
+    }
+    .stat-card::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%),
+                  rgba(56,189,248,0.12), transparent 60%);
+      opacity: 0;
+      transition: opacity var(--transition);
+      pointer-events: none;
     }
     .stat-card:hover {
       border-color: var(--accent-primary);
       transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(56,189,248,0.15);
     }
+    .stat-card:hover::before { opacity: 1; }
     .stat-number {
       font-size: 2rem; font-weight: 900;
       color: var(--accent-primary); display: block;
+      text-shadow: 0 0 20px rgba(56,189,248,0.4);
     }
     .stat-label {
       font-size: 0.8rem; color: var(--text-muted);
@@ -285,15 +438,33 @@
       border-radius: var(--radius); padding: 20px;
       display: flex; align-items: center; gap: 14px;
       transition: all var(--transition);
-      cursor: default;
-      /* 3D HOOK: add Vanilla-Tilt */
+      transform-style: preserve-3d;
+      position: relative;
+      overflow: hidden;
     }
+    .skill-card::after {
+      content: '';
+      position: absolute;
+      top: 0; left: -75%;
+      width: 50%; height: 100%;
+      background: linear-gradient(120deg, transparent, rgba(56,189,248,0.08), transparent);
+      transform: skewX(-25deg);
+      transition: left 0.7s ease;
+    }
+    .skill-card:hover::after { left: 125%; }
     .skill-card:hover {
       border-color: var(--accent-primary);
-      background: var(--accent-glow);
-      transform: translateY(-3px);
+      background: linear-gradient(135deg, var(--bg-card), var(--accent-glow));
+      transform: translateY(-4px);
+      box-shadow: 0 8px 30px rgba(56,189,248,0.15);
     }
-    .skill-icon { font-size: 1.4rem; }
+    .skill-icon {
+      font-size: 1.4rem;
+      transition: transform var(--transition);
+    }
+    .skill-card:hover .skill-icon {
+      transform: scale(1.2) rotate(-8deg);
+    }
     .skill-name {
       font-size: 0.875rem; font-weight: 600;
       color: var(--text-primary);
@@ -311,7 +482,6 @@
     }
     .timeline-item {
       position: relative; margin-bottom: 52px;
-      /* ANIMATE: slide in from left on scroll */
     }
     .timeline-item::before {
       content: '';
@@ -319,6 +489,11 @@
       width: 12px; height: 12px; border-radius: 50%;
       background: var(--accent-primary);
       box-shadow: 0 0 12px rgba(56,189,248,0.6);
+      animation: timeline-pulse 2.5s ease-in-out infinite;
+    }
+    @keyframes timeline-pulse {
+      0%, 100% { box-shadow: 0 0 12px rgba(56,189,248,0.6); }
+      50%      { box-shadow: 0 0 22px rgba(56,189,248,0.9); }
     }
     .timeline-header {
       display: flex; justify-content: space-between;
@@ -359,6 +534,12 @@
       background: rgba(56,189,248,0.08);
       border: 1px solid rgba(56,189,248,0.2);
       color: var(--accent-primary);
+      transition: all var(--transition);
+    }
+    .tag:hover {
+      background: rgba(56,189,248,0.18);
+      border-color: rgba(56,189,248,0.5);
+      transform: translateY(-1px);
     }
 
     /* =====================
@@ -376,7 +557,7 @@
       display: flex; flex-direction: column;
       transition: all var(--transition);
       position: relative; overflow: hidden;
-      /* 3D HOOK: add Vanilla-Tilt with glare effect */
+      transform-style: preserve-3d;
     }
     .project-card::before {
       content: '';
@@ -384,10 +565,25 @@
       height: 2px;
       background: linear-gradient(90deg, var(--accent-primary), #818cf8);
       transform: scaleX(0); transform-origin: left;
-      transition: transform var(--transition);
+      transition: transform 0.4s ease;
     }
-    .project-card:hover { border-color: rgba(56,189,248,0.3); transform: translateY(-6px); }
+    .project-card::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%),
+                  rgba(56,189,248,0.12), transparent 50%);
+      opacity: 0;
+      transition: opacity var(--transition);
+      pointer-events: none;
+    }
+    .project-card:hover {
+      border-color: rgba(56,189,248,0.4);
+      transform: translateY(-8px);
+      box-shadow: 0 18px 50px rgba(56,189,248,0.18),
+                  0 0 0 1px rgba(56,189,248,0.15);
+    }
     .project-card:hover::before { transform: scaleX(1); }
+    .project-card:hover::after { opacity: 1; }
     .project-number {
       font-size: 0.75rem; color: var(--text-muted);
       letter-spacing: 2px; margin-bottom: 16px; font-weight: 600;
@@ -399,14 +595,33 @@
       color: var(--text-secondary); font-size: 0.9rem;
       line-height: 1.7; flex: 1; margin-bottom: 24px;
     }
-    .project-links { display: flex; gap: 16px; }
+    .project-links { display: flex; gap: 16px; flex-wrap: wrap; }
     .project-link {
       font-size: 0.85rem; font-weight: 600;
       color: var(--accent-primary);
       display: flex; align-items: center; gap: 6px;
-      transition: gap var(--transition);
+      transition: gap var(--transition), text-shadow var(--transition);
     }
-    .project-link:hover { gap: 10px; }
+    .project-link:hover {
+      gap: 12px;
+      text-shadow: 0 0 12px rgba(56,189,248,0.6);
+    }
+
+    /* =====================
+       VIDEO EMBEDS
+       ===================== */
+    .video-frame {
+      border-radius: var(--radius);
+      overflow: hidden;
+      border: 1px solid var(--border);
+      transition: all var(--transition);
+      position: relative;
+    }
+    .video-frame:hover {
+      border-color: rgba(56,189,248,0.4);
+      box-shadow: 0 12px 40px rgba(56,189,248,0.18);
+      transform: translateY(-4px);
+    }
 
     /* =====================
        EDUCATION & CERTS
@@ -419,9 +634,20 @@
       border: 1px solid var(--border);
       border-radius: var(--radius); padding: 28px;
       transition: all var(--transition);
+      position: relative;
+      overflow: hidden;
     }
-    .edu-card:hover { border-color: var(--accent-primary); }
-    .edu-icon { font-size: 2rem; margin-bottom: 12px; }
+    .edu-card:hover {
+      border-color: var(--accent-primary);
+      transform: translateY(-4px);
+      box-shadow: 0 10px 30px rgba(56,189,248,0.15);
+    }
+    .edu-icon {
+      font-size: 2rem; margin-bottom: 12px;
+      display: inline-block;
+      transition: transform 0.5s ease;
+    }
+    .edu-card:hover .edu-icon { transform: rotate(-10deg) scale(1.1); }
     .edu-card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 4px; }
     .edu-card .edu-degree {
       color: var(--accent-primary); font-size: 0.875rem;
@@ -443,8 +669,17 @@
       font-size: 0.875rem; color: var(--text-secondary);
       transition: all var(--transition);
     }
-    .cert-item:hover { border-color: var(--accent-primary); color: var(--text-primary); }
-    .cert-item span { font-size: 1.1rem; }
+    .cert-item:hover {
+      border-color: var(--accent-primary);
+      color: var(--text-primary);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(56,189,248,0.12);
+    }
+    .cert-item span {
+      font-size: 1.1rem;
+      transition: transform var(--transition);
+    }
+    .cert-item:hover span { transform: scale(1.2); }
 
     /* =====================
        CONTACT
@@ -463,13 +698,28 @@
       border-radius: var(--radius); padding: 24px 32px;
       display: flex; align-items: center; gap: 14px;
       transition: all var(--transition); min-width: 220px;
+      position: relative;
+      overflow: hidden;
     }
+    .contact-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%;
+      width: 100%; height: 100%;
+      background: linear-gradient(120deg, transparent, rgba(56,189,248,0.1), transparent);
+      transition: left 0.6s ease;
+    }
+    .contact-card:hover::before { left: 100%; }
     .contact-card:hover {
       border-color: var(--accent-primary);
-      transform: translateY(-4px);
-      box-shadow: 0 8px 30px rgba(56,189,248,0.1);
+      transform: translateY(-6px);
+      box-shadow: 0 12px 40px rgba(56,189,248,0.18);
     }
-    .contact-icon { font-size: 1.4rem; }
+    .contact-icon {
+      font-size: 1.4rem;
+      transition: transform var(--transition);
+    }
+    .contact-card:hover .contact-icon { transform: scale(1.15) rotate(-6deg); }
     .contact-label {
       font-size: 0.75rem; color: var(--text-muted);
       text-transform: uppercase; letter-spacing: 1px;
@@ -492,9 +742,34 @@
     .footer-links { display: flex; gap: 24px; }
     .footer-links a {
       color: var(--text-muted); font-size: 0.85rem;
-      transition: color var(--transition);
+      transition: color var(--transition), text-shadow var(--transition);
     }
-    .footer-links a:hover { color: var(--accent-primary); }
+    .footer-links a:hover {
+      color: var(--accent-primary);
+      text-shadow: 0 0 8px rgba(56,189,248,0.6);
+    }
+
+    /* =====================
+       ANIMATION HELPERS
+       ===================== */
+    .reveal {
+      opacity: 0;
+      transform: translateY(40px);
+      will-change: transform, opacity;
+    }
+    .reveal-left {
+      opacity: 0;
+      transform: translateX(-40px);
+      will-change: transform, opacity;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+      .reveal, .reveal-left { opacity: 1; transform: none; }
+    }
 
     /* =====================
        RESPONSIVE
@@ -504,8 +779,8 @@
       .edu-grid { grid-template-columns: 1fr; }
     }
     @media (max-width: 768px) {
-      nav { padding: 16px 24px; }
-      .nav-links { display: none; } /* REPLACE with hamburger menu */
+      nav, nav.nav-scrolled { padding: 16px 24px; }
+      .nav-links { display: none; }
       .section, .section-full { padding: 70px 24px; }
       #hero h1 { font-size: 2.2rem; }
       footer { flex-direction: column; text-align: center; }
@@ -514,8 +789,12 @@
 </head>
 <body>
 
+  <!-- Custom cursor -->
+  <div class="cursor-ring"></div>
+  <div class="cursor-dot"></div>
+
   <!-- ============ NAV ============ -->
-  <nav>
+  <nav id="main-nav">
     <div class="nav-logo">KDR</div>
     <ul class="nav-links">
       <li><a href="#about">About</a></li>
@@ -530,13 +809,13 @@
   </nav>
 
   <!-- ============ HERO ============ -->
-  <!-- 3D HOOK: insert Three.js canvas here as position:absolute background -->
   <section id="hero">
+    <canvas id="hero-canvas"></canvas>
     <div class="hero-content">
-      <div class="hero-badge">Available for New Opportunities</div>
-      <h1>Kyle D. <span class="name-highlight">Roberts</span></h1>
-      <p class="hero-tagline">I build brands, scale e-commerce operations, and use AI tools to work smarter and stay ahead of the competition.</p>
-      <div class="hero-tags">
+      <div class="hero-badge" data-hero="0">Available for New Opportunities</div>
+      <h1 data-hero="1">Kyle D. <span class="name-highlight">Roberts</span></h1>
+      <p class="hero-tagline" data-hero="2">I build brands, scale e-commerce operations, and use AI tools to work smarter and stay ahead of the competition.</p>
+      <div class="hero-tags" data-hero="3">
         <span class="hero-tag">Paid Media</span>
         <span class="hero-tag">Email Marketing</span>
         <span class="hero-tag">Shopify</span>
@@ -544,7 +823,7 @@
         <span class="hero-tag">SEO</span>
         <span class="hero-tag">Analytics</span>
       </div>
-      <div class="hero-buttons">
+      <div class="hero-buttons" data-hero="4">
         <a href="#projects" class="btn btn-primary">View My Work ↓</a>
         <a href="https://www.linkedin.com/in/robertsdkyle/" target="_blank" class="btn btn-outline">LinkedIn ↗</a>
         <a href="mailto:robertsdkyle@gmail.com" class="btn btn-outline">Get In Touch</a>
@@ -558,12 +837,12 @@
 
   <!-- ============ ABOUT ============ -->
   <section class="section" id="about">
-    <div class="section-header">
+    <div class="section-header reveal">
       <span class="section-label">About Me</span>
       <h2>Full-Stack AI Engineer and Digital Operator</h2>
     </div>
     <div class="about-grid">
-      <div class="about-text">
+      <div class="about-text reveal">
         <p>I'm an e-commerce and digital marketing professional with hands-on experience building and scaling online businesses from the ground up. Whether managing international paid media at a national brand or architecting a Shopify storefront with custom auction workflows, I bring both strategic thinking and ground-level execution to everything I work on.</p>
         <p>My background covers paid media, email marketing, SEO, marketplace operations, and full-cycle e-commerce management. I've worked across Meta, Google, Klaviyo, Shopify, and eBay, and I know how to connect those tools into a system that actually converts.</p>
         <p>I am a Full-Stack AI Engineer. Since 2022 I have built a strong foundation in reading, editing, and applying code, and I use tools like Claude and ChatGPT to extend that foundation into more advanced builds and designs. AI does not replace my technical judgment; it amplifies it. The result is the ability to research, prototype, and ship work that would typically require a full team.</p>
@@ -574,21 +853,20 @@
         </div>
       </div>
       <div class="about-stats">
-        <!-- ANIMATE: count up numbers on scroll -->
-        <div class="stat-card">
-          <span class="stat-number">2+</span>
+        <div class="stat-card reveal">
+          <span class="stat-number" data-count="2" data-suffix="+">0</span>
           <span class="stat-label">Years in E-Commerce Ops</span>
         </div>
-        <div class="stat-card">
-          <span class="stat-number">3+</span>
+        <div class="stat-card reveal">
+          <span class="stat-number" data-count="3" data-suffix="+">0</span>
           <span class="stat-label">Channels Managed</span>
         </div>
-        <div class="stat-card">
-          <span class="stat-number">$75K+</span>
+        <div class="stat-card reveal">
+          <span class="stat-number" data-count="75" data-prefix="$" data-suffix="K+">$0</span>
           <span class="stat-label">Monthly Ad Spend Managed</span>
         </div>
-        <div class="stat-card">
-          <span class="stat-number">4</span>
+        <div class="stat-card reveal">
+          <span class="stat-number" data-count="4">0</span>
           <span class="stat-label">Industries Worked</span>
         </div>
       </div>
@@ -598,37 +876,36 @@
   <!-- ============ SKILLS ============ -->
   <div class="section-full" id="skills">
     <div class="inner">
-      <div class="section-header">
+      <div class="section-header reveal">
         <span class="section-label">Expertise</span>
         <h2>Skills & Tools</h2>
       </div>
-      <!-- ANIMATE: stagger cards on scroll -->
       <div class="skills-grid">
-        <div class="skill-card"><span class="skill-icon">📢</span><span class="skill-name">Paid Media (Meta & Google)</span></div>
-        <div class="skill-card"><span class="skill-icon">📧</span><span class="skill-name">Email Marketing via Klaviyo</span></div>
-        <div class="skill-card"><span class="skill-icon">🛒</span><span class="skill-name">Shopify Development</span></div>
-        <div class="skill-card"><span class="skill-icon">📦</span><span class="skill-name">eBay & Marketplace Ops</span></div>
-        <div class="skill-card"><span class="skill-icon">🔍</span><span class="skill-name">SEO & Content Strategy</span></div>
-        <div class="skill-card"><span class="skill-icon">📊</span><span class="skill-name">Google Analytics & Looker Studio</span></div>
-        <div class="skill-card"><span class="skill-icon">🧪</span><span class="skill-name">A/B Testing & CRO</span></div>
-        <div class="skill-card"><span class="skill-icon">📱</span><span class="skill-name">SMS Marketing</span></div>
-        <div class="skill-card"><span class="skill-icon">🎯</span><span class="skill-name">Auction System Management</span></div>
-        <div class="skill-card"><span class="skill-icon">📸</span><span class="skill-name">Product Photography Workflow</span></div>
-        <div class="skill-card"><span class="skill-icon">📦</span><span class="skill-name">Inventory & Fulfillment Ops</span></div>
-        <div class="skill-card"><span class="skill-icon">📈</span><span class="skill-name">Tableau & Data Visualization</span></div>
+        <div class="skill-card reveal"><span class="skill-icon">📢</span><span class="skill-name">Paid Media (Meta & Google)</span></div>
+        <div class="skill-card reveal"><span class="skill-icon">📧</span><span class="skill-name">Email Marketing via Klaviyo</span></div>
+        <div class="skill-card reveal"><span class="skill-icon">🛒</span><span class="skill-name">Shopify Development</span></div>
+        <div class="skill-card reveal"><span class="skill-icon">📦</span><span class="skill-name">eBay & Marketplace Ops</span></div>
+        <div class="skill-card reveal"><span class="skill-icon">🔍</span><span class="skill-name">SEO & Content Strategy</span></div>
+        <div class="skill-card reveal"><span class="skill-icon">📊</span><span class="skill-name">Google Analytics & Looker Studio</span></div>
+        <div class="skill-card reveal"><span class="skill-icon">🧪</span><span class="skill-name">A/B Testing & CRO</span></div>
+        <div class="skill-card reveal"><span class="skill-icon">📱</span><span class="skill-name">SMS Marketing</span></div>
+        <div class="skill-card reveal"><span class="skill-icon">🎯</span><span class="skill-name">Auction System Management</span></div>
+        <div class="skill-card reveal"><span class="skill-icon">📸</span><span class="skill-name">Product Photography Workflow</span></div>
+        <div class="skill-card reveal"><span class="skill-icon">📦</span><span class="skill-name">Inventory & Fulfillment Ops</span></div>
+        <div class="skill-card reveal"><span class="skill-icon">📈</span><span class="skill-name">Tableau & Data Visualization</span></div>
       </div>
     </div>
   </div>
 
   <!-- ============ EXPERIENCE ============ -->
   <section class="section" id="experience">
-    <div class="section-header">
+    <div class="section-header reveal">
       <span class="section-label">Career</span>
       <h2>Work Experience</h2>
     </div>
     <div class="timeline">
 
-      <div class="timeline-item">
+      <div class="timeline-item reveal-left">
         <div class="timeline-header">
           <div>
             <div class="timeline-title">Webmaster & E-Commerce Manager</div>
@@ -658,7 +935,7 @@
         </div>
       </div>
 
-      <div class="timeline-item">
+      <div class="timeline-item reveal-left">
         <div class="timeline-header">
           <div>
             <div class="timeline-title">Paid Media Manager</div>
@@ -686,7 +963,7 @@
         </div>
       </div>
 
-      <div class="timeline-item">
+      <div class="timeline-item reveal-left">
         <div class="timeline-header">
           <div>
             <div class="timeline-title">Store Manager</div>
@@ -705,7 +982,7 @@
         </div>
       </div>
 
-      <div class="timeline-item">
+      <div class="timeline-item reveal-left">
         <div class="timeline-header">
           <div>
             <div class="timeline-title">Real Estate Agent</div>
@@ -731,13 +1008,13 @@
   <!-- ============ PROJECTS ============ -->
   <div class="section-full" id="projects">
     <div class="inner">
-      <div class="section-header">
+      <div class="section-header reveal">
         <span class="section-label">Work</span>
         <h2>Featured Projects</h2>
       </div>
       <div class="projects-grid">
 
-        <div class="project-card">
+        <div class="project-card reveal">
           <div class="project-number">01</div>
           <h3>Long Island Liquidation</h3>
           <p>Built and operate a full Shopify e-commerce storefront for a pallet liquidation business. The site includes custom auction workflows, hybrid pickup and shipping options, back-in-stock notifications, cross-listing to eBay and Facebook Marketplace, SEO content, email and SMS marketing, and complete inventory management.</p>
@@ -749,7 +1026,7 @@
           </div>
         </div>
 
-        <div class="project-card">
+        <div class="project-card reveal">
           <div class="project-number">02</div>
           <h3>Bedgear: Paid Media and Email</h3>
           <p>Managed $75K+/month in international paid media and email marketing for a national sleep performance brand. Built automated Klaviyo flows, ran Meta and Google campaigns globally, and reported on CAC, ROAS, AOV, and LTV to leadership teams.</p>
@@ -761,7 +1038,7 @@
           </div>
         </div>
 
-        <div class="project-card">
+        <div class="project-card reveal">
           <div class="project-number">03</div>
           <h3>Wayward Traderz eBay Store</h3>
           <p>Personal eBay reselling operation specializing in liquidation and open-box merchandise. Manages multi-category listings, auction pricing strategy, order fulfillment, and customer service across all active listings.</p>
@@ -774,7 +1051,7 @@
           </div>
         </div>
 
-        <div class="project-card">
+        <div class="project-card reveal">
           <div class="project-number">04</div>
           <h3>Wayward Third: Content and Brand</h3>
           <p>A personal brand built across a website, Twitter/X, and multiple social platforms. Grew an audience through original content, commentary, and community engagement, with Twitter/X as the primary home for most of the active work.</p>
@@ -787,7 +1064,7 @@
           </div>
         </div>
 
-        <div class="project-card">
+        <div class="project-card reveal">
           <div class="project-number">05</div>
           <h3>Long Island Liquidation: YouTube</h3>
           <p>Manage and contribute to the Long Island Liquidation YouTube channel, serving as cameraman, content strategist, and creative director. Involved in content ideation, shoot planning, and video production that supports the brand's e-commerce and auction operations.</p>
@@ -799,7 +1076,7 @@
           </div>
         </div>
 
-        <div class="project-card">
+        <div class="project-card reveal">
           <div class="project-number">06</div>
           <h3>WordPress, Google and Beyond (2015)</h3>
           <p>Authored a comprehensive internal digital operations manual for a real estate brokerage, covering WordPress CMS management, Facebook Ads audience targeting, SEO, Google+, YouTube listing videos, and newsletter workflows. Written to bring a non-technical team up to speed on running their own digital marketing at a time when most agents were still outsourcing all of it.</p>
@@ -818,32 +1095,32 @@
   <!-- ============ VIDEOS ============ -->
   <div class="section-full" id="videos">
     <div class="inner">
-      <div class="section-header">
+      <div class="section-header reveal">
         <span class="section-label">Student Film</span>
         <h2>Mansfield University Film Projects</h2>
         <p>Short films I wrote, directed, filmed, and edited independently while studying Electronic Media at Mansfield University. Each project was a solo production from concept to final cut.</p>
       </div>
       <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:24px;">
-        <div style="border-radius:var(--radius); overflow:hidden; border:1px solid var(--border);">
+        <div class="video-frame reveal">
           <iframe width="100%" height="200" src="https://www.youtube.com/embed/l5mskpinJOE" frameborder="0" allowfullscreen></iframe>
         </div>
-        <div style="border-radius:var(--radius); overflow:hidden; border:1px solid var(--border);">
+        <div class="video-frame reveal">
           <iframe width="100%" height="200" src="https://www.youtube.com/embed/JcifMFLyvdw" frameborder="0" allowfullscreen></iframe>
         </div>
-        <div style="border-radius:var(--radius); overflow:hidden; border:1px solid var(--border);">
+        <div class="video-frame reveal">
           <iframe width="100%" height="200" src="https://www.youtube.com/embed/KxpkV9iEHQw" frameborder="0" allowfullscreen></iframe>
         </div>
       </div>
 
       <!-- Long Island Liquidation YouTube -->
       <div style="margin-top:64px;">
-        <div class="section-header" style="margin-bottom:24px;">
+        <div class="section-header reveal" style="margin-bottom:24px;">
           <span class="section-label">YouTube</span>
           <h2>Long Island Liquidation</h2>
           <p>On-camera talent, content strategist, and creative collaborator for the Long Island Liquidation YouTube channel. Involved in shoot planning, content ideation, and production supporting the brand's auction and e-commerce operations. <a href="https://www.youtube.com/@LongIslandLiquidation" target="_blank" style="color:var(--accent-primary);">View the full channel ↗</a></p>
         </div>
         <div style="max-width:720px;">
-          <div style="border-radius:var(--radius); overflow:hidden; border:1px solid var(--border);">
+          <div class="video-frame reveal">
             <iframe width="100%" height="400" src="https://www.youtube.com/embed/o7ILQU8KlEQ" frameborder="0" allowfullscreen></iframe>
           </div>
         </div>
@@ -853,18 +1130,18 @@
 
   <!-- ============ EDUCATION & CERTS ============ -->
   <section class="section" id="education">
-    <div class="section-header">
+    <div class="section-header reveal">
       <span class="section-label">Background</span>
       <h2>Education & Certifications</h2>
     </div>
     <div class="edu-grid">
-      <div class="edu-card">
+      <div class="edu-card reveal">
         <div class="edu-icon">🎓</div>
         <h3>Mansfield University</h3>
         <div class="edu-degree">B.S. in Mass Communication</div>
         <div class="edu-detail">Electronic Media Emphasis · Mansfield, PA</div>
       </div>
-      <div class="edu-card">
+      <div class="edu-card reveal">
         <div class="edu-icon">🔧</div>
         <h3>Middle Bucks Institute of Technology</h3>
         <div class="edu-degree">Public Safety Concentration</div>
@@ -873,56 +1150,56 @@
     </div>
 
     <div class="certs-grid">
-      <div class="cert-item"><span>🦅</span> Eagle Scout</div>
-      <div class="cert-item"><span>🎯</span> Meta Certified Digital Marketing Associate</div>
-      <div class="cert-item"><span>🚒</span> Firefighter (Lifetime)</div>
-      <div class="cert-item"><span>🚑</span> PA Emergency Medical Technician</div>
-      <div class="cert-item"><span>🍸</span> ATAP: Alcohol Training Awareness Program</div>
-      <div class="cert-item"><span>🍃</span> Certified Cannabis Budtender, NCC Board</div>
-      <div class="cert-item"><span>📚</span> Intro to Cannabis, University of Illinois</div>
-      <div class="cert-item"><span>🍽️</span> Learn2Serve Food Handler</div>
-      <div class="cert-item"><span>🔱</span> Sigma Alpha Epsilon (SAE)</div>
+      <div class="cert-item reveal"><span>🦅</span> Eagle Scout</div>
+      <div class="cert-item reveal"><span>🎯</span> Meta Certified Digital Marketing Associate</div>
+      <div class="cert-item reveal"><span>🚒</span> Firefighter (Lifetime)</div>
+      <div class="cert-item reveal"><span>🚑</span> PA Emergency Medical Technician</div>
+      <div class="cert-item reveal"><span>🍸</span> ATAP: Alcohol Training Awareness Program</div>
+      <div class="cert-item reveal"><span>🍃</span> Certified Cannabis Budtender, NCC Board</div>
+      <div class="cert-item reveal"><span>📚</span> Intro to Cannabis, University of Illinois</div>
+      <div class="cert-item reveal"><span>🍽️</span> Learn2Serve Food Handler</div>
+      <div class="cert-item reveal"><span>🔱</span> Sigma Alpha Epsilon (SAE)</div>
     </div>
   </section>
 
   <!-- ============ CONTACT ============ -->
   <div class="section-full" id="contact">
     <div class="inner">
-      <div class="section-header" style="text-align:center;">
+      <div class="section-header reveal" style="text-align:center;">
         <span class="section-label" style="display:block; text-align:center;">Let's Connect</span>
         <h2>Get In Touch</h2>
         <p>Open to new roles, freelance projects, and consulting opportunities.</p>
       </div>
       <div class="contact-grid">
-        <a href="mailto:robertsdkyle@gmail.com" class="contact-card">
+        <a href="mailto:robertsdkyle@gmail.com" class="contact-card reveal">
           <span class="contact-icon">✉️</span>
           <div>
             <div class="contact-label">Email</div>
             <div class="contact-value">robertsdkyle@gmail.com</div>
           </div>
         </a>
-        <a href="https://www.linkedin.com/in/robertsdkyle/" target="_blank" class="contact-card">
+        <a href="https://www.linkedin.com/in/robertsdkyle/" target="_blank" class="contact-card reveal">
           <span class="contact-icon">💼</span>
           <div>
             <div class="contact-label">LinkedIn</div>
             <div class="contact-value">linkedin.com/in/robertsdkyle</div>
           </div>
         </a>
-        <a href="https://www.ebay.com/str/waywardtraderz" target="_blank" class="contact-card">
+        <a href="https://www.ebay.com/str/waywardtraderz" target="_blank" class="contact-card reveal">
           <span class="contact-icon">🛍️</span>
           <div>
             <div class="contact-label">eBay Store</div>
             <div class="contact-value">Wayward Traderz</div>
           </div>
         </a>
-        <a href="https://longislandliquidation.com" target="_blank" class="contact-card">
+        <a href="https://longislandliquidation.com" target="_blank" class="contact-card reveal">
           <span class="contact-icon">📦</span>
           <div>
             <div class="contact-label">Current Project</div>
             <div class="contact-value">longislandliquidation.com</div>
           </div>
         </a>
-        <a href="https://x.com/waywardthird" target="_blank" class="contact-card">
+        <a href="https://x.com/waywardthird" target="_blank" class="contact-card reveal">
           <span class="contact-icon">𝕏</span>
           <div>
             <div class="contact-label">Twitter / X</div>
@@ -945,6 +1222,338 @@
       <a href="ebay.html">Store</a>
     </div>
   </footer>
+
+  <!-- =====================================================
+       ANIMATION ENGINE
+       ===================================================== -->
+  <script>
+    (function () {
+      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      /* -------------------------------------------------
+         1. THREE.JS PARTICLE / WAVE HERO BACKGROUND
+         ------------------------------------------------- */
+      function initHero3D() {
+        if (reduced || !window.THREE) return;
+        const canvas = document.getElementById('hero-canvas');
+        if (!canvas) return;
+
+        const renderer = new THREE.WebGLRenderer({
+          canvas, alpha: true, antialias: true,
+          powerPreference: 'high-performance'
+        });
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(60, 1, 0.1, 1000);
+        camera.position.z = 70;
+
+        // PARTICLE FIELD
+        const particleCount = 1200;
+        const positions = new Float32Array(particleCount * 3);
+        const speeds = new Float32Array(particleCount);
+        for (let i = 0; i < particleCount; i++) {
+          positions[i * 3]     = (Math.random() - 0.5) * 200;
+          positions[i * 3 + 1] = (Math.random() - 0.5) * 120;
+          positions[i * 3 + 2] = (Math.random() - 0.5) * 120;
+          speeds[i] = 0.2 + Math.random() * 0.6;
+        }
+        const pGeo = new THREE.BufferGeometry();
+        pGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+        const pMat = new THREE.PointsMaterial({
+          color: 0x38bdf8,
+          size: 0.6,
+          transparent: true,
+          opacity: 0.7,
+          blending: THREE.AdditiveBlending,
+          depthWrite: false
+        });
+        const particles = new THREE.Points(pGeo, pMat);
+        scene.add(particles);
+
+        // WAVE LATTICE
+        const waveGeo = new THREE.PlaneGeometry(220, 120, 60, 30);
+        const waveMat = new THREE.MeshBasicMaterial({
+          color: 0x818cf8,
+          wireframe: true,
+          transparent: true,
+          opacity: 0.12
+        });
+        const wave = new THREE.Mesh(waveGeo, waveMat);
+        wave.rotation.x = -Math.PI / 2.6;
+        wave.position.y = -30;
+        wave.position.z = -10;
+        scene.add(wave);
+
+        const wavePositions = waveGeo.attributes.position;
+        const initialY = new Float32Array(wavePositions.count);
+        for (let i = 0; i < wavePositions.count; i++) {
+          initialY[i] = wavePositions.getZ(i);
+        }
+
+        // MOUSE PARALLAX
+        const mouse = { x: 0, y: 0, tx: 0, ty: 0 };
+        window.addEventListener('mousemove', (e) => {
+          mouse.tx = (e.clientX / window.innerWidth - 0.5) * 2;
+          mouse.ty = (e.clientY / window.innerHeight - 0.5) * 2;
+        });
+
+        function resize() {
+          const w = canvas.clientWidth;
+          const h = canvas.clientHeight;
+          renderer.setSize(w, h, false);
+          camera.aspect = w / h;
+          camera.updateProjectionMatrix();
+        }
+        resize();
+        window.addEventListener('resize', resize);
+
+        let frame = 0;
+        function animate() {
+          frame += 0.008;
+
+          mouse.x += (mouse.tx - mouse.x) * 0.04;
+          mouse.y += (mouse.ty - mouse.y) * 0.04;
+
+          // Particle drift
+          const pos = pGeo.attributes.position.array;
+          for (let i = 0; i < particleCount; i++) {
+            pos[i * 3 + 1] += speeds[i] * 0.04;
+            if (pos[i * 3 + 1] > 60) pos[i * 3 + 1] = -60;
+          }
+          pGeo.attributes.position.needsUpdate = true;
+
+          particles.rotation.y = mouse.x * 0.15;
+          particles.rotation.x = mouse.y * 0.08;
+
+          // Wave undulation
+          for (let i = 0; i < wavePositions.count; i++) {
+            const x = wavePositions.getX(i);
+            const y = wavePositions.getY(i);
+            wavePositions.setZ(i,
+              Math.sin(x * 0.08 + frame * 1.2) * 2 +
+              Math.cos(y * 0.1 + frame) * 1.4
+            );
+          }
+          wavePositions.needsUpdate = true;
+          wave.rotation.z = mouse.x * 0.05;
+
+          renderer.render(scene, camera);
+          requestAnimationFrame(animate);
+        }
+        animate();
+      }
+
+      /* -------------------------------------------------
+         2. GSAP SCROLL-TRIGGERED REVEALS + HERO TIMELINE
+         ------------------------------------------------- */
+      function initGSAP() {
+        if (!window.gsap) return;
+        if (window.ScrollTrigger) gsap.registerPlugin(ScrollTrigger);
+
+        if (reduced) {
+          gsap.set('.reveal, .reveal-left', { opacity: 1, x: 0, y: 0 });
+          gsap.set('#main-nav', { y: 0, opacity: 1 });
+          gsap.set('[data-hero]', { opacity: 1, y: 0 });
+          return;
+        }
+
+        // Nav entrance
+        gsap.to('#main-nav', {
+          y: 0, opacity: 1,
+          duration: 0.9,
+          ease: 'power3.out',
+          delay: 0.2
+        });
+
+        // Hero stagger
+        gsap.from('[data-hero]', {
+          y: 30, opacity: 0,
+          duration: 0.9,
+          ease: 'power3.out',
+          stagger: 0.12,
+          delay: 0.4
+        });
+
+        // Generic reveals
+        gsap.utils.toArray('.reveal').forEach((el) => {
+          gsap.fromTo(el,
+            { opacity: 0, y: 40 },
+            {
+              opacity: 1, y: 0,
+              duration: 0.9,
+              ease: 'power3.out',
+              scrollTrigger: {
+                trigger: el,
+                start: 'top 88%',
+                toggleActions: 'play none none none'
+              }
+            }
+          );
+        });
+
+        // Left-slide reveals (timeline)
+        gsap.utils.toArray('.reveal-left').forEach((el, i) => {
+          gsap.fromTo(el,
+            { opacity: 0, x: -50 },
+            {
+              opacity: 1, x: 0,
+              duration: 0.9,
+              ease: 'power3.out',
+              delay: i * 0.05,
+              scrollTrigger: {
+                trigger: el,
+                start: 'top 85%',
+                toggleActions: 'play none none none'
+              }
+            }
+          );
+        });
+
+        // Stat counters
+        gsap.utils.toArray('.stat-number').forEach((el) => {
+          const target = parseFloat(el.dataset.count);
+          if (isNaN(target)) return;
+          const prefix = el.dataset.prefix || '';
+          const suffix = el.dataset.suffix || '';
+          const obj = { val: 0 };
+          ScrollTrigger.create({
+            trigger: el,
+            start: 'top 90%',
+            once: true,
+            onEnter: () => {
+              gsap.to(obj, {
+                val: target,
+                duration: 1.6,
+                ease: 'power2.out',
+                onUpdate: () => {
+                  const display = target % 1 === 0
+                    ? Math.round(obj.val)
+                    : obj.val.toFixed(1);
+                  el.textContent = prefix + display + suffix;
+                }
+              });
+            }
+          });
+        });
+      }
+
+      /* -------------------------------------------------
+         3. VANILLA-TILT ON CARDS
+         ------------------------------------------------- */
+      function initTilt() {
+        if (reduced || !window.VanillaTilt) return;
+        if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+
+        VanillaTilt.init(document.querySelectorAll('.project-card'), {
+          max: 8,
+          speed: 600,
+          glare: true,
+          'max-glare': 0.18,
+          scale: 1.015,
+          perspective: 1200
+        });
+
+        VanillaTilt.init(document.querySelectorAll('.skill-card'), {
+          max: 10,
+          speed: 500,
+          glare: true,
+          'max-glare': 0.12,
+          scale: 1.03,
+          perspective: 900
+        });
+      }
+
+      /* -------------------------------------------------
+         4. FLOATING NAV (frosted glass on scroll)
+         ------------------------------------------------- */
+      function initNavScroll() {
+        const nav = document.getElementById('main-nav');
+        if (!nav) return;
+        const onScroll = () => {
+          if (window.scrollY > 40) nav.classList.add('nav-scrolled');
+          else nav.classList.remove('nav-scrolled');
+        };
+        window.addEventListener('scroll', onScroll, { passive: true });
+        onScroll();
+      }
+
+      /* -------------------------------------------------
+         5. CARD SPOTLIGHT (cursor-tracked glow)
+         ------------------------------------------------- */
+      function initCardSpotlight() {
+        const cards = document.querySelectorAll('.project-card, .stat-card');
+        cards.forEach((card) => {
+          card.addEventListener('mousemove', (e) => {
+            const r = card.getBoundingClientRect();
+            const x = ((e.clientX - r.left) / r.width) * 100;
+            const y = ((e.clientY - r.top) / r.height) * 100;
+            card.style.setProperty('--mx', x + '%');
+            card.style.setProperty('--my', y + '%');
+          });
+        });
+      }
+
+      /* -------------------------------------------------
+         6. CUSTOM CURSOR
+         ------------------------------------------------- */
+      function initCursor() {
+        if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+        const dot = document.querySelector('.cursor-dot');
+        const ring = document.querySelector('.cursor-ring');
+        if (!dot || !ring) return;
+
+        const pos = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+        const ringPos = { x: pos.x, y: pos.y };
+
+        document.addEventListener('mousemove', (e) => {
+          pos.x = e.clientX;
+          pos.y = e.clientY;
+          dot.style.transform =
+            `translate(${pos.x}px, ${pos.y}px) translate(-50%, -50%)`;
+        });
+
+        function loop() {
+          ringPos.x += (pos.x - ringPos.x) * 0.18;
+          ringPos.y += (pos.y - ringPos.y) * 0.18;
+          ring.style.transform =
+            `translate(${ringPos.x}px, ${ringPos.y}px) translate(-50%, -50%)`;
+          requestAnimationFrame(loop);
+        }
+        loop();
+
+        const hoverables = document.querySelectorAll(
+          'a, button, .btn, .project-card, .skill-card, .contact-card, .stat-card, .edu-card, .cert-item, iframe'
+        );
+        hoverables.forEach((el) => {
+          el.addEventListener('mouseenter', () => ring.classList.add('hover'));
+          el.addEventListener('mouseleave', () => ring.classList.remove('hover'));
+        });
+
+        document.addEventListener('mouseleave', () => {
+          dot.style.opacity = '0';
+          ring.style.opacity = '0';
+        });
+        document.addEventListener('mouseenter', () => {
+          dot.style.opacity = '1';
+          ring.style.opacity = '1';
+        });
+      }
+
+      /* -------------------------------------------------
+         BOOT
+         ------------------------------------------------- */
+      document.addEventListener('DOMContentLoaded', () => {
+        initNavScroll();
+        initGSAP();
+        initTilt();
+        initCardSpotlight();
+        initCursor();
+        initHero3D();
+      });
+    })();
+  </script>
 
 </body>
 </html>
