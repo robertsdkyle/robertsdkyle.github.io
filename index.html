@@ -492,16 +492,19 @@
        ===================== */
     .about-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1.4fr 1fr;
       gap: 60px; align-items: start;
     }
     .about-text p {
-      color: var(--text-secondary); line-height: 1.9;
-      margin-bottom: 20px; font-size: 1rem;
+      color: var(--text-secondary); line-height: 1.85;
+      margin-bottom: 18px; font-size: 1rem;
     }
     .about-stats {
       display: grid; grid-template-columns: 1fr 1fr;
-      gap: 20px;
+      gap: 16px;
+      position: sticky;
+      top: 100px;
+      align-self: start;
     }
     .stat-card {
       background: var(--bg-card);
@@ -534,6 +537,12 @@
       font-size: 2rem; font-weight: 900;
       color: var(--accent-primary); display: block;
       text-shadow: 0 0 20px rgba(56,189,248,0.4);
+    }
+    .stat-headline {
+      font-size: 1.4rem; font-weight: 800;
+      color: var(--accent-primary); display: block;
+      text-shadow: 0 0 20px rgba(56,189,248,0.4);
+      line-height: 1.15;
     }
     .stat-label {
       font-size: 0.8rem; color: var(--text-muted);
@@ -915,6 +924,7 @@
     }
     @media (max-width: 900px) {
       .about-grid { grid-template-columns: 1fr; gap: 40px; }
+      .about-stats { position: static; top: auto; }
       .edu-grid { grid-template-columns: 1fr; }
       .timeline-header { flex-direction: column; align-items: flex-start; }
     }
@@ -1053,20 +1063,20 @@
       </div>
       <div class="about-stats">
         <div class="stat-card reveal">
-          <span class="stat-number" data-count="2" data-suffix="+">0</span>
-          <span class="stat-label">Years in E-Commerce Ops</span>
+          <span class="stat-number" data-count="15" data-suffix="+">0</span>
+          <span class="stat-label">Years of Digital Operations</span>
         </div>
         <div class="stat-card reveal">
-          <span class="stat-number" data-count="3" data-suffix="+">0</span>
-          <span class="stat-label">Channels Managed</span>
+          <span class="stat-headline">Omnichannel</span>
+          <span class="stat-label">Marketing Strategy</span>
         </div>
         <div class="stat-card reveal">
           <span class="stat-number" data-count="75" data-prefix="$" data-suffix="K+">$0</span>
           <span class="stat-label">Monthly Ad Spend Managed</span>
         </div>
         <div class="stat-card reveal">
-          <span class="stat-number" data-count="4">0</span>
-          <span class="stat-label">Industries Worked</span>
+          <span class="stat-headline">Naturally</span>
+          <span class="stat-label">Selling &amp; Building</span>
         </div>
       </div>
     </div>
