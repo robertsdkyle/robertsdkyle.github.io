@@ -1077,7 +1077,12 @@
       transform: translateY(8px);
       will-change: transform, opacity;
     }
-    .hero-tagline-char.is-space { width: 0.28em; }
+    /* Each word is an atomic inline-block that never breaks mid-word; the real
+       (breakable) spaces between word wrappers stay the only line-break points. */
+    .hero-tagline-word {
+      display: inline-block;
+      white-space: nowrap;
+    }
 
     /* --- Project card shimmer pass on the top accent bar --- */
     .project-card::before {
@@ -1880,16 +1885,31 @@
         if (!window.gsap) return;
         if (window.ScrollTrigger) gsap.registerPlugin(ScrollTrigger);
 
-        // Split the tagline into character spans for fine-grained reveal
+        // Split the tagline into WORD wrappers, each holding per-character spans.
+        // Word wrappers are display:inline-block + white-space:nowrap, so a word
+        // can never break across lines mid-word. Real (breakable) spaces sit
+        // between the wrappers, so the line still wraps normally at word
+        // boundaries. Every character keeps the .hero-tagline-char class, so the
+        // existing gsap.to('.hero-tagline-char', { ...stagger }) reveal — which
+        // selects in document order — animates left-to-right exactly as before.
         const tagline = document.querySelector('.hero-tagline');
         if (tagline && !tagline.dataset.split) {
-          const text = tagline.textContent;
+          const words = tagline.textContent.split(' ');
           tagline.textContent = '';
-          [...text].forEach((ch) => {
-            const span = document.createElement('span');
-            span.className = 'hero-tagline-char' + (ch === ' ' ? ' is-space' : '');
-            span.textContent = ch === ' ' ? ' ' : ch;
-            tagline.appendChild(span);
+          words.forEach((word, wIndex) => {
+            const wordEl = document.createElement('span');
+            wordEl.className = 'hero-tagline-word';
+            [...word].forEach((ch) => {
+              const span = document.createElement('span');
+              span.className = 'hero-tagline-char';
+              span.textContent = ch;
+              wordEl.appendChild(span);
+            });
+            tagline.appendChild(wordEl);
+            // Breakable space between words (omitted after the final word).
+            if (wIndex < words.length - 1) {
+              tagline.appendChild(document.createTextNode(' '));
+            }
           });
           tagline.dataset.split = 'true';
         }
