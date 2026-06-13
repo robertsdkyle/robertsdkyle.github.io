@@ -1098,6 +1098,11 @@
       display: inline-block;
       white-space: nowrap;
     }
+    /* Each sentence is its own block, so the line break always falls between
+       sentences; words still wrap naturally within a sentence on narrow screens. */
+    .hero-tagline-sentence {
+      display: block;
+    }
 
     /* --- Project card shimmer pass on the top accent bar --- */
     .project-card::before {
@@ -1471,7 +1476,7 @@
           <h3>Long Island Liquidation</h3>
           <p>Built and operate a full Shopify e-commerce storefront for a pallet liquidation business. The site includes custom auction workflows, hybrid pickup and shipping options, back-in-stock notifications, cross-listing to eBay and Facebook Marketplace, SEO content, email and SMS marketing, and complete inventory management.</p>
           <div class="timeline-tags" style="margin-bottom:20px;">
-            <span class="tag">Shopify</span><span class="tag">SEO</span><span class="tag">Klaviyo</span><span class="tag">eBay</span>
+            <span class="tag">Shopify</span><span class="tag">SEO</span><span class="tag">Klaviyo</span><span class="tag">eBay</span><span class="tag">Management</span><span class="tag">Event Planning</span>
           </div>
           <div class="project-links">
             <a href="https://longislandliquidation.com" target="_blank" class="project-link">Visit Site →</a>
@@ -1530,18 +1535,6 @@
 
         <div class="project-card reveal">
           <div class="project-number">06</div>
-          <h3>Long Island Liquidation: YouTube</h3>
-          <p>Manage and contribute to the Long Island Liquidation YouTube channel, serving as cameraman, content strategist, and creative director. Involved in content ideation, shoot planning, and video production that supports the brand's e-commerce and auction operations.</p>
-          <div class="timeline-tags" style="margin-bottom:20px;">
-            <span class="tag">YouTube</span><span class="tag">Video Production</span><span class="tag">Content Strategy</span>
-          </div>
-          <div class="project-links">
-            <a href="https://www.youtube.com/@LongIslandLiquidation" target="_blank" class="project-link">Channel →</a>
-          </div>
-        </div>
-
-        <div class="project-card reveal">
-          <div class="project-number">07</div>
           <h3>WordPress, Google and Beyond (2015)</h3>
           <p>Authored a comprehensive internal digital operations manual for a real estate brokerage, covering WordPress CMS management, Facebook Ads audience targeting, SEO, Google+, YouTube listing videos, and newsletter workflows. Written to bring a non-technical team up to speed on running their own digital marketing at a time when most agents were still outsourcing all of it.</p>
           <div class="timeline-tags" style="margin-bottom:20px;">
@@ -1924,7 +1917,8 @@
         if (!window.gsap) return;
         if (window.ScrollTrigger) gsap.registerPlugin(ScrollTrigger);
 
-        // Split the tagline into WORD wrappers, each holding per-character spans.
+        // Split the tagline into SENTENCE blocks (each block-level, so the line
+        // break always falls between sentences), then WORD wrappers, then chars.
         // Word wrappers are display:inline-block + white-space:nowrap, so a word
         // can never break across lines mid-word. Real (breakable) spaces sit
         // between the wrappers, so the line still wraps normally at word
@@ -1933,22 +1927,32 @@
         // selects in document order — animates left-to-right exactly as before.
         const tagline = document.querySelector('.hero-tagline');
         if (tagline && !tagline.dataset.split) {
-          const words = tagline.textContent.split(' ');
+          const text = tagline.textContent.trim();
+          // Sentences, keeping terminal punctuation (. ! ?).
+          const sentences = (text.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [text])
+            .map((s) => s.trim())
+            .filter(Boolean);
           tagline.textContent = '';
-          words.forEach((word, wIndex) => {
-            const wordEl = document.createElement('span');
-            wordEl.className = 'hero-tagline-word';
-            [...word].forEach((ch) => {
-              const span = document.createElement('span');
-              span.className = 'hero-tagline-char';
-              span.textContent = ch;
-              wordEl.appendChild(span);
+          sentences.forEach((sentence) => {
+            const sentenceEl = document.createElement('span');
+            sentenceEl.className = 'hero-tagline-sentence';
+            const words = sentence.split(' ');
+            words.forEach((word, wIndex) => {
+              const wordEl = document.createElement('span');
+              wordEl.className = 'hero-tagline-word';
+              [...word].forEach((ch) => {
+                const span = document.createElement('span');
+                span.className = 'hero-tagline-char';
+                span.textContent = ch;
+                wordEl.appendChild(span);
+              });
+              sentenceEl.appendChild(wordEl);
+              // Breakable space between words (omitted after the final word).
+              if (wIndex < words.length - 1) {
+                sentenceEl.appendChild(document.createTextNode(' '));
+              }
             });
-            tagline.appendChild(wordEl);
-            // Breakable space between words (omitted after the final word).
-            if (wIndex < words.length - 1) {
-              tagline.appendChild(document.createTextNode(' '));
-            }
+            tagline.appendChild(sentenceEl);
           });
           tagline.dataset.split = 'true';
         }
