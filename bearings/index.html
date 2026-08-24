@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bearings. Know what is around you.</title>
+<meta name="description" content="Pick the town you are staying in, anywhere in the Northeast, and learn what is around you: which way every town sits, how far it really is, and which ones are worth the drive.">
+<link rel="stylesheet" href="fonts/fonts.css">
+<link rel="stylesheet" href="vendor/leaflet/leaflet.css">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<div class="shell">
+
+<div class="head">
+
+  <p class="eyebrow">Bearings &middot; know what is around you</p>
+
+  <div class="find">
+    <input id="q" type="text" autocomplete="off" spellcheck="false"
+           placeholder="Type any town, like Stowe or Cape May"
+           aria-label="Search for a town">
+    <div class="hits" id="hits"></div>
+  </div>
+
+  <div id="onboard" class="onboard hidden">
+    <h2>Where are you staying?</h2>
+    <p>Type the town above and we will set your bearings from it. Hotel town,
+       rented cabin, a friend's couch: wherever you sleep tonight is your base.</p>
+    <button class="locate" id="locateBtn">Or find the town nearest me</button>
+    <p class="locate-note" id="locateNote"></p>
+  </div>
+
+  <div id="hubBlock" class="hidden">
+    <div class="hubline">
+      <h1 id="hubName"></h1>
+      <span class="state" id="hubState"></span>
+    </div>
+    <p class="kindline" id="kindLine"></p>
+    <p class="fromhome" id="fromHome"></p>
+    <div class="basebtns">
+      <button class="basebtn hidden" id="makeBase">Make this my base</button>
+      <button class="basebtn hidden" id="backBase">Back to your base</button>
+      <button class="basebtn ghost" id="moveBase">Staying somewhere new?</button>
+    </div>
+
+    <div class="radius">
+      <p>Within</p>
+      <button class="chip" data-r="5">5 mi</button>
+      <button class="chip" data-r="15">15 mi</button>
+      <button class="chip" data-r="30">30 mi</button>
+      <button class="chip" data-r="45">45 mi</button>
+      <button class="chip" data-r="60">60 mi</button>
+    </div>
+  </div>
+
+</div><!-- /head -->
+
+<div class="stage">
+
+  <div class="views" role="group" aria-label="View">
+    <button class="view" id="viewMap" aria-pressed="true">Map</button>
+    <button class="view" id="viewCompass" aria-pressed="false">Compass</button>
+  </div>
+
+  <div id="map"></div>
+  <p class="maplegend" id="mapLegend"></p>
+
+  <div class="plot hidden" id="plotWrap">
+    <svg id="radar" viewBox="0 0 360 384" role="img" aria-label="Compass plot of nearby towns"></svg>
+  </div>
+
+</div><!-- /stage -->
+
+<div class="detail" id="detail">
+
+  <div class="tabs" role="tablist">
+    <button class="tab" id="tabList" role="tab" aria-selected="true" aria-controls="paneList">Neighbors</button>
+    <button class="tab" id="tabQuiz" role="tab" aria-selected="false" aria-controls="paneQuiz">Quiz me</button>
+  </div>
+
+  <div id="paneList" role="tabpanel" aria-labelledby="tabList">
+    <ol id="list"></ol>
+    <div class="pager hidden" id="pager">
+      <button id="pagePrev" aria-label="Previous page">&#8592;</button>
+      <span id="pageInfo"></span>
+      <button id="pageNext" aria-label="Next page">&#8594;</button>
+    </div>
+    <p class="foot" id="listFoot"></p>
+  </div>
+
+  <div id="paneQuiz" class="hidden" role="tabpanel" aria-labelledby="tabQuiz">
+    <div class="cats" id="cats" role="group" aria-label="Question type"></div>
+    <p class="ask" id="ask"></p>
+    <p class="asknote" id="askNote">Pick below, and the map fills in the moment you do.</p>
+    <div class="opts" id="opts"></div>
+    <p class="verdict" id="verdict"></p>
+    <button class="next hidden" id="next">Next question</button>
+    <p class="score" id="score"></p>
+  </div>
+
+</div><!-- /detail -->
+
+</div><!-- /shell -->
+
+<script src="vendor/leaflet/leaflet.js"></script>
+<script src="js/store.js"></script>
+<script src="js/geo.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
