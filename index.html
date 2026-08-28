@@ -599,6 +599,13 @@
     /* =====================
        SKILLS
        ===================== */
+    .skill-group { margin: 34px 0 14px; }
+    .skill-group:first-of-type { margin-top: 8px; }
+    .skill-group-title {
+      font-size: 1.05rem; font-weight: 600; letter-spacing: 0.04em;
+      text-transform: uppercase; color: var(--accent-primary); margin-bottom: 4px;
+    }
+    .skill-group-blurb { font-size: 0.92rem; color: var(--text-secondary); }
     .skills-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -1259,7 +1266,7 @@
       <div class="hero-badge" data-hero="0">Available for New Opportunities</div>
       <h1 data-hero="1"><span class="hero-name-word">Kyle</span> <span class="hero-name-word">D.</span> <span class="hero-name-word name-highlight">Roberts</span></h1>
       <p class="hero-role" data-hero="role">E-Commerce <span class="role-dot">·</span> Digital Marketing <span class="role-dot">·</span> Brand Building</p>
-      <p class="hero-tagline" data-hero="2">I build brands and the systems that grow them. Tell me what you want, and I'll figure it out.</p>
+      <p class="hero-tagline" data-hero="2">I create brands, build the systems that run them, and get them in front of people. A decade of ideas shipped, not pitched.</p>
       <div class="hero-tags" data-hero="3">
         <span class="hero-tag">Paid Media</span>
         <span class="hero-tag">Email Marketing</span>
@@ -1284,7 +1291,7 @@
   <section class="section" id="about">
     <div class="section-header reveal">
       <span class="section-label">About Me</span>
-      <h2>I Build Brands and Figure Out the Rest</h2>
+      <h2>I've Been Building This Whole Time</h2>
     </div>
     <div class="about-grid">
       <div class="about-text reveal">
@@ -1292,7 +1299,7 @@
         <p>That kicked off the pattern that's defined everything since: I'll figure it out. When I moved to Long Island, a colleague asked if I knew how to put a shopping cart on a website. I'd never touched e-commerce. I said no, but how hard could it be? So I taught myself, and built a small grassroots brand its first real sales funnel from the ground up: a full storefront, email and SMS, shipping worked into their workflow, and a rebrand that matched the loyal following they'd grown organically on Twitter. The brand didn't survive, but the skills did. It's where I learned e-commerce by doing it.</p>
         <p>At Bedgear I jumped from tiny projects into a corporate e-commerce department. I was hired as a junior paid media planner; about three months in, nearly the whole team left, and I was suddenly running paid media and email from concept to execution. I introduced SMS, built their Klaviyo flows, added on-site email capture, took Facebook ROAS from 0.3 to 1.5, and expanded marketing into Canada and Australia. Going from junior to running a brand across international markets was a crash course, and I figured it out.</p>
         <p>Now I'm webmaster and operations manager at Open Box Pallet Liquidation. I came in to learn reselling from the ground up (packing, shipping, the logistics I'd always dodged with drop-shipping) and grew their eBay store from 12 reviews to 1,600+ at a 99.8% rating, listing 20–30 items a day and treating it like a real brand instead of a junk drawer. In August 2025 they handed me longislandliquidation.com: crosslisting, individual items, mystery boxes, pallet sales, freight estimates, truckload lead nurturing, and a branding hub, all in one. It's the most complex thing I've built. As the longest-standing employee on an 8–10 person team, I've also taken on hiring, training, truckload buying, and floor planning. Whatever the business needs.</p>
-        <p>AI has been in my toolkit longer than most. I built <a href="https://www.waywardthird.com" target="_blank" style="color:var(--accent-primary);">Wayward Third</a> as a fully AI-generated brand back in 2022, so I know how to get real quality out of these tools. In 2026 I brought Claude into my daily workflow for the work that used to need a designer or a developer I didn't have: polished email templates wired to Shopify, landing pages, automations that turned hours into minutes. I'm not a classically trained developer; I'm a relentless figure-it-out-er who can finally execute the ideas in my head.</p>
+        <p>AI has been in my toolkit longer than most. I built <a href="https://www.waywardthird.com" target="_blank" style="color:var(--accent-primary);">Wayward Third</a> as a fully AI-generated brand back in 2022, when that still meant fighting the tools for every usable output, so I learned early how to pull real quality out of them. These days they handle the work that used to stall me out waiting on a designer or a developer I didn't have: polished email templates wired to Shopify, landing pages, automations that turn hours into minutes. I've been shipping since 2015, long before any of this existed. The ideas were always there. The tools just stopped being the bottleneck.</p>
         <p>I build things I wish existed. <a href="https://yardsalehopper.com" target="_blank" style="color:var(--accent-primary);">yardsalehopper.com</a> came straight out of my own Friday-night frustration hunting yard sales across a dozen sites, so I built one that sweeps the web, collects the listings automatically, links back to the original posts, and maps the best route to hit them all. The roadblocks are the fun part. Put me on the right team and there's not much I can't build.</p>
         <div style="margin-top:28px; display:flex; gap:14px; flex-wrap:wrap;">
           <a href="mailto:robertsdkyle@gmail.com" class="btn btn-primary">Email Me</a>
@@ -1327,27 +1334,46 @@
     <div class="inner">
       <div class="section-header reveal">
         <span class="section-label">Expertise</span>
-        <h2>Skills & Tools</h2>
+        <h2>Create, Build, Distribute</h2>
+      </div>
+
+      <div class="skill-group reveal">
+        <h3 class="skill-group-title">Create</h3>
+        <p class="skill-group-blurb">Making the thing exist</p>
+      </div>
+      <div class="skills-grid">
+        <div class="skill-card reveal"><span class="skill-icon">🎨</span><span class="skill-name">Brand Development</span></div>
+        <div class="skill-card reveal"><span class="skill-icon">🔍</span><span class="skill-name">SEO & Content Strategy</span></div>
+        <div class="skill-card reveal"><span class="skill-icon">🎬</span><span class="skill-name">Video & On-Camera Production</span></div>
+        <div class="skill-card reveal"><span class="skill-icon">📸</span><span class="skill-name">Product Photography Workflow</span></div>
+        <div class="skill-card reveal"><span class="skill-icon">🧲</span><span class="skill-name">Sales Funnel Architecture</span></div>
+      </div>
+
+      <div class="skill-group reveal">
+        <h3 class="skill-group-title">Build</h3>
+        <p class="skill-group-blurb">Systems, stores, and teams that run it</p>
+      </div>
+      <div class="skills-grid">
+        <div class="skill-card reveal"><span class="skill-icon">🛒</span><span class="skill-name">Shopify Development</span></div>
+        <div class="skill-card reveal"><span class="skill-icon">🎯</span><span class="skill-name">Auction System Management</span></div>
+        <div class="skill-card reveal"><span class="skill-icon">📦</span><span class="skill-name">Inventory & Fulfillment Ops</span></div>
+        <div class="skill-card reveal"><span class="skill-icon">🧪</span><span class="skill-name">A/B Testing & CRO</span></div>
+        <div class="skill-card reveal"><span class="skill-icon">📊</span><span class="skill-name">Google Analytics & Looker Studio</span></div>
+        <div class="skill-card reveal"><span class="skill-icon">📈</span><span class="skill-name">Tableau & Data Visualization</span></div>
+        <div class="skill-card reveal"><span class="skill-icon">👥</span><span class="skill-name">Team Leadership & Training</span></div>
+      </div>
+
+      <div class="skill-group reveal">
+        <h3 class="skill-group-title">Distribute</h3>
+        <p class="skill-group-blurb">Getting it in front of people</p>
       </div>
       <div class="skills-grid">
         <div class="skill-card reveal"><span class="skill-icon">📢</span><span class="skill-name">Paid Media (Meta & Google)</span></div>
         <div class="skill-card reveal"><span class="skill-icon">📧</span><span class="skill-name">Email Marketing via Klaviyo</span></div>
-        <div class="skill-card reveal"><span class="skill-icon">🛒</span><span class="skill-name">Shopify Development</span></div>
-        <div class="skill-card reveal"><span class="skill-icon">📦</span><span class="skill-name">eBay & Marketplace Ops</span></div>
-        <div class="skill-card reveal"><span class="skill-icon">🔍</span><span class="skill-name">SEO & Content Strategy</span></div>
-        <div class="skill-card reveal"><span class="skill-icon">📊</span><span class="skill-name">Google Analytics & Looker Studio</span></div>
-        <div class="skill-card reveal"><span class="skill-icon">🧪</span><span class="skill-name">A/B Testing & CRO</span></div>
         <div class="skill-card reveal"><span class="skill-icon">📱</span><span class="skill-name">SMS Marketing</span></div>
-        <div class="skill-card reveal"><span class="skill-icon">🎯</span><span class="skill-name">Auction System Management</span></div>
-        <div class="skill-card reveal"><span class="skill-icon">📸</span><span class="skill-name">Product Photography Workflow</span></div>
-        <div class="skill-card reveal"><span class="skill-icon">📦</span><span class="skill-name">Inventory & Fulfillment Ops</span></div>
-        <div class="skill-card reveal"><span class="skill-icon">📈</span><span class="skill-name">Tableau & Data Visualization</span></div>
-        <div class="skill-card reveal"><span class="skill-icon">🧲</span><span class="skill-name">Sales Funnel Architecture</span></div>
-        <div class="skill-card reveal"><span class="skill-icon">🎨</span><span class="skill-name">Brand Development</span></div>
-        <div class="skill-card reveal"><span class="skill-icon">👥</span><span class="skill-name">Team Leadership & Training</span></div>
-        <div class="skill-card reveal"><span class="skill-icon">💬</span><span class="skill-name">Customer Experience (CX)</span></div>
+        <div class="skill-card reveal"><span class="skill-icon">📦</span><span class="skill-name">eBay & Marketplace Ops</span></div>
         <div class="skill-card reveal"><span class="skill-icon">🧭</span><span class="skill-name">Lead Generation</span></div>
-        <div class="skill-card reveal"><span class="skill-icon">🤖</span><span class="skill-name">AI-Assisted Production & Automation</span></div>
+        <div class="skill-card reveal"><span class="skill-icon">💬</span><span class="skill-name">Customer Experience (CX)</span></div>
       </div>
     </div>
   </div>
@@ -1488,7 +1514,7 @@
           <h3>Yard Sale Hopper</h3>
           <p>A yard-sale aggregator I built to fix my own problem: hunting for sales across a dozen sites every Friday night. It sweeps the web for listings, uploads them automatically, links back to the original posts, and maps the most efficient route to hit them all.</p>
           <div class="timeline-tags" style="margin-bottom:20px;">
-            <span class="tag">Web App</span><span class="tag">Automation</span><span class="tag">AI-Assisted</span><span class="tag">Route Optimization</span>
+            <span class="tag">Web App</span><span class="tag">Automation</span><span class="tag">Web Scraping</span><span class="tag">Route Optimization</span>
           </div>
           <div class="project-links">
             <a href="https://yardsalehopper.com" target="_blank" class="project-link">Visit Site →</a>
@@ -1615,10 +1641,6 @@
       <div class="cert-item reveal"><span>🎯</span> Meta Certified Digital Marketing Associate</div>
       <div class="cert-item reveal"><span>🚒</span> Firefighter (Lifetime)</div>
       <div class="cert-item reveal"><span>🚑</span> PA Emergency Medical Technician</div>
-      <div class="cert-item reveal"><span>🍸</span> ATAP: Alcohol Training Awareness Program</div>
-      <div class="cert-item reveal"><span>🍃</span> Certified Cannabis Budtender, NCC Board</div>
-      <div class="cert-item reveal"><span>📚</span> Intro to Cannabis, University of Illinois</div>
-      <div class="cert-item reveal"><span>🍽️</span> Learn2Serve Food Handler</div>
       <div class="cert-item reveal"><span>🔱</span> Sigma Alpha Epsilon (SAE)</div>
     </div>
   </section>
@@ -1678,9 +1700,9 @@
     <p class="footer-sig">
       KDR
       <span class="sig-dot">·</span>
-      Built with <a href="https://claude.ai" target="_blank" rel="noopener">Claude</a>
+      Long Island, NY
       <span class="sig-dot">·</span>
-      © 2025
+      © 2026
     </p>
     <div class="footer-links">
       <a href="mailto:robertsdkyle@gmail.com">Email</a>
