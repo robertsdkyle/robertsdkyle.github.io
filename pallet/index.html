@@ -381,9 +381,15 @@
     overflow: hidden;
   }
   .opt:hover:not([disabled]) { border-color: var(--ink); }
-  .opt .stripe { grid-row: 1 / span 3; align-self: stretch; }
+  .opt .stripe { grid-row: 1 / span 4; align-self: stretch; }
   .opt .t { font-weight: 800; font-stretch: 85%; font-size: 1rem; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-  .opt .n { font-family: var(--f-mono); font-weight: 600; font-size: 1.5rem; line-height: 1; font-variant-numeric: tabular-nums; text-align: right; }
+  .opt .t { grid-column: 2; grid-row: 1; }
+  .opt .math { grid-row: 2; }
+  .opt .d { grid-row: 3; }
+  .opt .w { grid-row: 4; }
+  .opt .n { grid-column: 3; grid-row: 1 / span 2; align-self: start; font-family: var(--f-mono); font-weight: 600; font-size: 1.5rem; line-height: 1; font-variant-numeric: tabular-nums; text-align: right; }
+  .opt .n small { display: block; font-family: var(--f-body); font-size: 0.62rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-soft); margin-top: 3px; }
+  .opt .math { grid-column: 2; font-family: var(--f-mono); font-size: 0.74rem; color: var(--ink-soft); }
   .opt .d { grid-column: 2 / span 2; font-size: 0.82rem; color: var(--ink-soft); display: flex; flex-wrap: wrap; gap: 0 6px; align-items: baseline; }
   .opt .d .time { color: var(--ink); font-weight: 800; }
   .opt .d .rng { margin-left: auto; font-family: var(--f-mono); font-size: 0.75rem; }
@@ -521,7 +527,7 @@
   const NO_SHOW = 0.12, NO_SHOW_RAIN = 0.3;
   const UPSELL = 0.18;                       // "if they don't see it, they can't buy it"
   const SCAM_RATE = 0.2, SCAM_FEEDBACK = 5, SCAM_PRICE = 150;
-  const TIME_VALUE = 15 / 60;                // $/minute, used only for the Pro pick
+  const LOW_VALUE = 5;                       // below this, the best pick is to bundle or donate
 
   const SHIP = { S: 6, M: 14, L: 38 };
   const SIZE_LABEL = { S: 'Ships small', M: 'Medium box', L: 'Bulky' };
@@ -725,16 +731,21 @@
   function evalOption(it, ch, pricing, s) {
     s = s || state;
     const c = CH[ch];
-    const res = { ch, ok: true, notes: [], time: 0, exp: 0, lo: 0, hi: 0, when: '' };
+    // sale - fees - ship - risk = keep. The sheet shows exactly this math.
+    const res = { ch, ok: true, notes: [], time: 0, exp: 0, lo: 0, hi: 0, when: '', sale: 0, fees: 0, ship: 0, risk: 0 };
     if (c.kind === 'online') {
       res.time = ch === 'ebay' ? s.up.ebayMin : 15;
       if (c.apparel && !isApparel(it)) { res.ok = false; res.why = 'Poshmark is for apparel and shoes.'; return res; }
       res.lo = onlineNet(it, ch, onlinePrice(it, ch, pricing, 0));
       res.hi = onlineNet(it, ch, onlinePrice(it, ch, pricing, 1));
-      let exp = (res.lo + res.hi) / 2;
+      res.sale = onlinePrice(it, ch, pricing, 0.5);
+      res.fees = res.sale * c.fee + c.flat;
+      res.ship = c.ships ? shipCost(it) : 0;
+      const base = res.sale - res.fees - res.ship;
+      let exp = base;
       if (it.cond === 'UNTESTED') {
-        exp = (1 - DOA_RATE) * exp - DOA_RATE * (c.ships ? shipCost(it) * 2 : 8);
-        res.notes.push(['bad', 'Untested: if it\'s dead, the buyer files an INAD return and you eat shipping both ways.']);
+        exp = (1 - DOA_RATE) * base - DOA_RATE * (c.ships ? shipCost(it) * 2 : 8);
+        res.notes.push(['bad', `Untested: ${Math.round(DOA_RATE * 100)}% chance it's dead and comes back as an INAD return.`]);
       }
       const p = sellChance(it, ch, pricing, s);
       res.days = Math.max(1, Math.round(1 / p));
@@ -744,33 +755,36 @@
         exp *= 0.5;
       }
       if (c.ships && it.size === 'L') res.notes.push(['bad', `Bulky: the label alone is ${money(SHIP.L)}. Local might net more.`]);
-      if (res.hi < 10 && it.cond !== 'BROKEN') res.notes.push(['bad', 'Under $10 after fees and shipping. Bundle it instead.']);
-      if (it.cond === 'BROKEN') res.notes.push(['meh', it.powered ? 'Listed "for parts or not working."' : 'Listed as-is, flaws shown.']);
-      if (s.feedback < SCAM_FEEDBACK && onlinePrice(it, ch, pricing, 0.5) > SCAM_PRICE) {
+      if (base < 10 && it.cond !== 'BROKEN') res.notes.push(['bad', 'Under $10 after fees and shipping. Bundle it instead.']);
+      if (s.feedback < SCAM_FEEDBACK && res.sale > SCAM_PRICE) {
         res.notes.push(['bad', `New seller with ${s.feedback} feedback and a high-dollar item. Scammers love that combo.`]);
         exp -= SCAM_RATE * (exp + shipCost(it));
       }
       if (c.apparel) res.notes.push(['good', 'Apparel sells best here. Buyer pays shipping.']);
-      if (ch === 'mercari') res.notes.push(['meh', 'Quicker to list, lower prices, slower sales.']);
-      if (it.cond === 'OPEN' && c.kind === 'online') res.notes.push(['meh', 'Open box: list it as used, not new.']);
-      res.exp = exp * Math.min(1, (p * 3)); // a listing that sits ties up cash
+      if (it.cond === 'BROKEN') res.notes.push(['meh', it.powered ? 'Listed "for parts or not working."' : 'Listed as-is, flaws shown.']);
+      res.risk = Math.max(0, base - exp);
+      res.exp = exp;
     } else if (c.kind === 'local') {
       res.time = s.up.fbMin;
       [res.lo, res.hi] = fbRange(it);
-      let exp = (res.lo + res.hi) / 2 * (1 - NO_SHOW);
+      res.sale = (res.lo + res.hi) / 2;
+      let exp = res.sale;
       if (it.cond === 'UNTESTED') { exp *= (1 - DOA_RATE); res.notes.push(['bad', 'Buyer will test it at pickup. If it\'s dead, they walk.']); }
       res.when = 'cash today';
       if (RESTRICTED.test(it.name)) res.notes.push(['good', 'No listing takedowns locally.']);
       if (it.size === 'L') res.notes.push(['good', 'Bulky stuff sells best locally. No box, no label.']);
-      res.notes.push(['meh', `Expect lowballers. ${Math.round(NO_SHOW * 100)}% chance of a no-show.`]);
+      res.risk = Math.max(0, res.sale - exp);
       res.exp = exp;
     } else if (c.kind === 'bundle') {
       const others = s.inv.filter(x => x.status === 'shelf' && x.plan && x.plan.ch === 'bundle' && x.id !== it.id);
       res.time = others.length ? 0 : BUNDLE_MIN;
+      res.sale = bundleValue(it);
+      res.fees = res.sale * CH.ebay.fee;
+      res.ship = 1;
       res.lo = res.hi = res.exp = bundleShare(it);
       const cats = new Set(others.map(x => x.cat).concat([it.cat]));
       res.when = others.length ? `joins a lot of ${others.length + 1}` : 'starts a new lot (needs 2+)';
-      if (midv(it) > 30) res.notes.push(['bad', 'Worth more on its own. Bundles are for low-dollar items.']);
+      if (midv(it) > BUNDLE_CAP * 1.5) res.notes.push(['bad', 'Worth more on its own. Bundles are for low-dollar items.']);
       res.notes.push(cats.size > 1 ? ['bad', 'Mixed categories: lots with no clear theme sell for less.'] : ['good', `Themed ${it.cat} lot. Buyers like a clear theme.`]);
     } else {
       res.when = 'gone today';
@@ -779,15 +793,24 @@
     return res;
   }
 
-  function proPick(it, s) {
+  // Best pick = the most money you keep. Time only breaks near-ties.
+  function proPick(it, s, pricing) {
     s = s || state;
+    const online = pricing || (s.feedback < 3 ? 'move' : 'market');
     let best = null;
     for (const ch of CH_ORDER) {
-      const pr = ch === 'posh' || ch === 'mercari' || ch === 'ebay' ? (s.feedback < 3 ? 'move' : 'market') : 'market';
+      const pr = CH[ch].kind === 'online' ? online : 'market';
       const o = evalOption(it, ch, pr, s);
       if (!o.ok) continue;
-      const score = o.exp - o.time * TIME_VALUE - (ch === 'bundle' ? 0 : 0);
-      if (!best || score > best.score) best = { ch, pricing: pr, score };
+      const score = o.exp - o.time / 60;
+      if (!best || score > best.score) best = { ch, pricing: pr, score, exp: o.exp, time: o.time };
+    }
+    // Junk isn't worth a listing or a meetup. Clear it out instead.
+    if (best && best.time > 0 && CH[best.ch].kind !== 'bundle' && Math.round(best.exp) < LOW_VALUE) {
+      const top = best.exp;
+      const b = evalOption(it, 'bundle', 'market', s);
+      best = b.exp > 0.5 ? { ch: 'bundle', pricing: 'market', score: b.exp, exp: b.exp, time: b.time } : { ch: 'donate', pricing: 'market', score: 0, exp: 0, time: 0 };
+      best.why = `Best single sale keeps ~${money(top)}. Not worth your time. Clear it out.`;
     }
     return best;
   }
@@ -1078,7 +1101,7 @@
   function optionValue(it, ch, pricing) {
     const o = evalOption(it, ch, CH[ch].kind === 'online' ? pricing : 'market');
     if (!o.ok) return null;
-    return CH[ch].kind === 'donate' ? 0 : CH[ch].kind === 'bundle' ? o.exp : (o.lo + o.hi) / 2;
+    return CH[ch].kind === 'donate' ? 0 : o.exp;
   }
   const moneyCls = v => v > 0.5 ? 'pos' : v < -0.5 ? 'neg' : 'zero';
 
@@ -1087,6 +1110,7 @@
     let label, v;
     if (plan) { label = CH[plan.ch].name; v = optionValue(it, plan.ch, plan.pricing); }
     else { const pp = proPick(it); label = 'Best: ' + CH[pp.ch].name; v = optionValue(it, pp.ch, pp.pricing); }
+    label = 'you keep · ' + label.replace('Best: ', 'best on ');
     const chip = plan
       ? `<span class="chip ${plan.ch}">✓ ${CH[plan.ch].name}${CH[plan.ch].kind === 'online' ? ' · ' + PRICING[plan.pricing].label : ''}</span>`
       : `<span class="chip todo">Tap to sort</span>`;
@@ -1186,7 +1210,7 @@
     const it = state.inv.find(x => x.id === state.sheet.id);
     const pr = state.sheet.pricing;
     const [a, b] = range(it);
-    const pp = proPick(it);
+    const pp = proPick(it, state, pr);
     const left = timeLeft() + planTime(it) + (it.plan && it.plan.ch === 'bundle' && shelf().filter(x => x.plan && x.plan.ch === 'bundle').length === 1 ? BUNDLE_MIN : 0);
     const optRow = ch => {
       const kind = CH[ch].kind;
@@ -1196,15 +1220,22 @@
       const chosen = it.plan && it.plan.ch === ch;
       const isPro = pp && pp.ch === ch;
       const v = optionValue(it, ch, pr);
-      const big = kind === 'donate' || Math.abs(v) < 0.5 ? '$0' : v < 0 ? money(v) : (kind === 'bundle' ? '+' : '~') + money(v);
-      const rng = kind === 'online' || kind === 'local' ? `${money(o.lo)}–${money(o.hi)}` : '';
-      const note = o.notes.find(n => n[0] === 'bad') || o.notes.find(n => n[0] === 'good');
+      const big = kind === 'donate' || Math.abs(v) < 0.5 ? '$0' : v < 0 ? money(v) : '~' + money(v);
+      const parts = kind === 'online'
+        ? [`Sells ~${money(o.sale)}`, `− ${money(o.fees)} fees`].concat(o.ship ? [`− ${money(o.ship)} ship`] : ['buyer pays ship'])
+        : kind === 'local' ? [`Buyers pay ~${money(o.sale)} cash`, 'after haggling']
+        : kind === 'bundle' ? [`Adds ~${money(o.sale)} to the lot`, `− ${money(o.fees)} fees`]
+        : [];
+      if (o.risk >= 0.5) parts.push(`− ${money(o.risk)} risk`);
+      const math = parts.length ? `<span class="math">${parts.join(' ')}</span>` : '';
+      const note = isPro && pp.why ? ['good', pp.why] : o.notes.find(n => n[0] === 'bad') || o.notes.find(n => n[0] === 'good');
       const timeTxt = o.time ? hm(o.time) : 'no time';
       return `<button class="opt ${isPro ? 'pro-row' : ''}" data-ch="${ch}" aria-pressed="${chosen}" ${!fits && !chosen ? 'disabled' : ''}>
         <span class="stripe" style="background:${CH[ch].color}"></span>
         <span class="t">${CH[ch].name}${isPro ? ' <span class="pro">Best pick</span>' : ''}${chosen ? ' <span class="picked">✓ Chosen</span>' : ''}</span>
-        <span class="n ${moneyCls(v)}">${big}</span>
-        <span class="d"><b class="time">${timeTxt}</b> · ${!fits && !chosen ? 'not enough time today' : o.when}${rng ? `<span class="rng">${rng}</span>` : ''}</span>
+        <span class="n ${moneyCls(v)}">${big}<small>you keep</small></span>
+        ${math}
+        <span class="d"><b class="time">${timeTxt}</b> · ${!fits && !chosen ? 'not enough time today' : o.when}</span>
         ${note ? `<span class="w ${note[0]}">${note[1]}</span>` : ''}
       </button>`;
     };
