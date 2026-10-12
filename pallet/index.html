@@ -4,9 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Pallet Rip</title>
-<meta name="description" content="Buy mystery liquidation pallets, rip them open, and flip the haul on eBay before the rent comes due. Ten days. Six hundred bucks. Good luck.">
+<meta name="description" content="Buy mystery liquidation pallets, rip them open, sort the haul, and sell it on eBay, Mercari, Poshmark and Marketplace before the rent comes due. Ten days. Six hundred bucks.">
 <meta property="og:title" content="Pallet Rip">
-<meta property="og:description" content="Buy mystery liquidation pallets, rip them open, flip the haul. Ten days, $600.">
+<meta property="og:description" content="Buy mystery liquidation pallets, rip them open, sort the haul, sell it. Ten days, $600.">
 <meta property="og:url" content="https://robertsdkyle.com/pallet/">
 <meta name="theme-color" content="#b98f5e">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='4' fill='%23c49a68'/><rect x='14' y='0' width='4' height='32' fill='%23e8d3a2'/><rect x='3' y='26' width='26' height='4' fill='%236b4a2b'/></svg>">
@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=IBM+Plex+Mono:wght@400;600&family=Permanent+Marker&display=swap">
 <style>
-  /* Layout: one corrugated-cardboard workbench; a sticky shipping-label status bar, then a single stage that swaps auction → rip → receipt. Single deliberate look (warehouse kraft), not themed. */
+  /* Layout: one corrugated-cardboard workbench; a sticky shipping-label status bar, then a single stage that swaps auction → rip/sort → receipt. Single deliberate look (warehouse kraft), not themed. */
   :root {
     --kraft:      #c49a68;
     --kraft-dark: #a57b4b;
@@ -28,7 +28,17 @@
     --forklift:   #f2b705;  /* jackpot / forklift yellow */
     --gain:       #23743f;
     --loss:       #b3261e;
+    --warn:       #a85d00;
     --shadow:     rgba(55, 33, 12, 0.28);
+    --scrim:      rgba(31, 27, 22, 0.55);
+
+    /* channel tape colors */
+    --ch-ebay:    #2f5fc4;
+    --ch-mercari: #6a3fb5;
+    --ch-posh:    #8c1d40;
+    --ch-fb:      #0f7470;
+    --ch-bundle:  #7a5226;
+    --ch-donate:  #6b6359;
 
     --f-marker: 'Permanent Marker', 'Comic Sans MS', 'Marker Felt', cursive;
     --f-body:   'Archivo', 'Arial Narrow', system-ui, sans-serif;
@@ -51,10 +61,11 @@
       repeating-linear-gradient(90deg, var(--kraft-line) 0 2px, transparent 2px 9px),
       radial-gradient(ellipse at 20% 0%, rgba(255,240,210,0.35), transparent 60%);
   }
+  body.sheet-open { overflow: hidden; }
   button { font: inherit; color: inherit; cursor: pointer; }
   :focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
 
-  .wrap { max-width: 1060px; margin: 0 auto; padding-inline: 16px; padding-block: 0 64px; }
+  .wrap { max-width: 1060px; margin: 0 auto; padding-inline: 16px; padding-block: 0 120px; }
 
   /* ---------- Status bar (shipping label) ---------- */
   .bar {
@@ -65,7 +76,7 @@
   }
   .bar-inner {
     max-width: 1060px; margin: 0 auto;
-    display: flex; flex-wrap: wrap; align-items: center; gap: 10px 22px;
+    display: flex; flex-wrap: wrap; align-items: center; gap: 8px 22px;
   }
   .logo {
     font-family: var(--f-marker); font-size: 1.7rem; line-height: 1;
@@ -74,12 +85,13 @@
   .logo span { color: var(--sticker); }
   .stat { display: flex; flex-direction: column; line-height: 1.1; }
   .stat small {
-    font-size: 0.66rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+    font-size: 0.64rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
     color: rgba(31,27,22,0.62);
   }
-  .stat b { font-family: var(--f-mono); font-size: 1.05rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .stat b { font-family: var(--f-mono); font-size: 1rem; font-weight: 600; font-variant-numeric: tabular-nums; }
   .stat b.neg { color: var(--loss); }
-  .cash b { font-size: 1.35rem; }
+  .stat b.warn { color: #7a1a12; }
+  .cash b { font-size: 1.3rem; }
   .cash.bump b { animation: bump .5s ease; }
   @keyframes bump { 40% { transform: scale(1.18); } }
 
@@ -90,7 +102,7 @@
   }
   .stage-head { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 12px 24px; margin: 28px 0 18px; }
   .stage-head h2 { font-size: clamp(1.7rem, 4.5vw, 2.5rem); }
-  .stage-head p { margin: 6px 0 0; max-width: 60ch; color: var(--ink); }
+  .stage-head p { margin: 6px 0 0; max-width: 62ch; color: var(--ink); }
   .btn {
     display: inline-flex; align-items: center; justify-content: center; gap: 8px;
     border: 2px solid var(--ink); background: var(--ink); color: var(--paper);
@@ -103,22 +115,32 @@
   .btn:active { transform: translate(2px,2px); box-shadow: 1px 1px 0 var(--shadow); }
   .btn.ghost { background: transparent; color: var(--ink); }
   .btn.hot { background: var(--sticker); border-color: var(--ink); color: var(--paper); }
+  .btn.small { padding: 7px 12px; font-size: 0.8rem; }
   .btn[disabled] { opacity: 0.45; cursor: not-allowed; transform: none; }
   .row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
   .note { font-size: 0.9rem; color: var(--ink-soft); }
+
+  /* book tip: a torn page from the guide */
+  .tip {
+    background: var(--paper); border-left: 6px solid var(--sticker);
+    padding: 12px 16px; max-width: 560px; box-shadow: 0 4px 10px var(--shadow);
+    transform: rotate(-0.4deg);
+  }
+  .tip small { display: block; font-size: 0.66rem; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-soft); margin-bottom: 4px; }
+  .tip p { margin: 0; font-size: 0.95rem; }
 
   /* ---------- Intro ---------- */
   .intro { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 32px; align-items: center; margin-top: 40px; }
   .intro h1 { font-size: clamp(3rem, 11vw, 6.4rem); transform: rotate(-3deg); transform-origin: left; }
   .intro h1 span { color: var(--sticker); }
-  .intro .lede { font-size: 1.15rem; max-width: 46ch; margin: 22px 0; }
-  .rules { list-style: none; margin: 0 0 26px; padding: 0; display: grid; gap: 8px; max-width: 52ch; }
+  .intro .lede { font-size: 1.15rem; max-width: 48ch; margin: 22px 0; }
+  .rules { list-style: none; margin: 0 0 26px; padding: 0; display: grid; gap: 8px; max-width: 56ch; }
   .rules li { display: grid; grid-template-columns: 4.5rem 1fr; gap: 10px; }
   .rules b { font-family: var(--f-mono); font-weight: 600; }
   .best-line { margin-top: 14px; font-family: var(--f-mono); font-size: 0.85rem; color: var(--ink-soft); }
 
   /* ---------- Shipping labels (auction lots) ---------- */
-  .lots { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 22px; }
+  .lots { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 22px; }
   .lot {
     position: relative; background: var(--paper); border: 1px solid var(--paper-edge);
     padding: 18px 18px 16px; box-shadow: 0 6px 14px var(--shadow);
@@ -127,7 +149,7 @@
   .lot:nth-child(1) { transform: rotate(-0.8deg); }
   .lot:nth-child(2) { transform: rotate(0.6deg); }
   .lot:nth-child(3) { transform: rotate(-0.3deg); }
-  .lot::before { /* tape strip */
+  .lot::before {
     content: ""; position: absolute; top: -12px; left: 50%; width: 92px; height: 24px;
     transform: translateX(-50%) rotate(-3deg); background: var(--tape);
     box-shadow: 0 1px 2px rgba(0,0,0,0.12);
@@ -144,8 +166,15 @@
   .lot dt { color: var(--ink-soft); }
   .lot dd { margin: 0; text-align: right; font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
   .lot dd.unknown { font-family: var(--f-marker); color: var(--sticker); }
+  .tells { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tells span {
+    font-size: 0.74rem; font-weight: 700; padding: 2px 8px; border-radius: 999px; border: 1.5px solid currentColor;
+  }
+  .tells .good { color: var(--gain); }
+  .tells .bad { color: var(--loss); }
+  .tells-h { font-size: 0.66rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-soft); }
   .barcode {
-    height: 34px;
+    height: 30px;
     background: repeating-linear-gradient(90deg, var(--ink) 0 2px, transparent 2px 4px, var(--ink) 4px 5px, transparent 5px 8px, var(--ink) 8px 11px, transparent 11px 12px);
   }
   .lot-foot { display: flex; align-items: end; justify-content: space-between; gap: 10px; margin-top: auto; }
@@ -154,6 +183,7 @@
   .lot.cant { filter: grayscale(0.6); }
   .lot.cant .btn { background: var(--ink-soft); border-color: var(--ink-soft); }
   .skip-row { margin-top: 26px; }
+  .holdings { font-family: var(--f-mono); font-size: 0.85rem; }
 
   /* ---------- The box ---------- */
   .box-stage { display: grid; place-items: center; padding: 30px 0 10px; }
@@ -163,7 +193,6 @@
     border: 2px solid rgba(60,38,16,0.45);
     box-shadow: 0 18px 30px var(--shadow);
     cursor: pointer;
-    perspective: 700px;
   }
   .box .flap {
     position: absolute; top: -2px; width: 50%; height: 30%;
@@ -178,7 +207,7 @@
     background: var(--tape); box-shadow: 0 1px 3px rgba(0,0,0,0.15);
     transition: opacity .3s ease .3s;
   }
-  .box .tape::after { /* the cut */
+  .box .tape::after {
     content: ""; position: absolute; left: 50%; top: 0; width: 2px; height: 0; background: var(--ink);
     transition: height .3s ease;
   }
@@ -195,47 +224,58 @@
   .box.shake { animation: shake .4s ease; }
   @keyframes shake { 25% { transform: rotate(-2deg); } 75% { transform: rotate(2deg); } }
 
-  /* ---------- Item tags ---------- */
-  .haul-bar {
-    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 20px;
-    background: var(--ink); color: var(--paper); padding: 12px 16px; margin-bottom: 18px;
+  /* ---------- Workbench ---------- */
+  .clock {
+    position: sticky; z-index: 9; top: calc(env(safe-area-inset-top, 0px) + var(--bar-h, 64px));
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 18px;
+    background: var(--ink); color: var(--paper); padding: 10px 14px; margin-bottom: 18px;
     box-shadow: 3px 3px 0 var(--shadow);
   }
-  .haul-bar .slots { display: flex; gap: 6px; }
-  .haul-bar .slot { width: 22px; height: 22px; border: 2px solid var(--paper); border-radius: 3px; }
-  .haul-bar .slot.on { background: var(--forklift); border-color: var(--forklift); }
-  .haul-bar .proj { font-family: var(--f-mono); font-size: 0.9rem; font-variant-numeric: tabular-nums; }
-  .haul-bar .proj b { color: var(--forklift); font-weight: 600; }
-  .haul-bar .row { gap: 10px; }
-  .haul-bar .btn { box-shadow: none; }
-  .haul-bar .btn.ghost { color: var(--paper); border-color: var(--paper); }
+  .clock .meter { display: grid; grid-template-columns: repeat(12, 1fr); gap: 3px; width: min(260px, 100%); }
+  .clock .meter i { height: 14px; border: 1.5px solid var(--paper); border-radius: 2px; }
+  .clock .meter i.used { background: var(--forklift); border-color: var(--forklift); }
+  .clock .meter i.part { background: linear-gradient(90deg, var(--forklift) 50%, transparent 50%); border-color: var(--forklift); }
+  .clock .left { font-family: var(--f-mono); font-size: 0.9rem; font-variant-numeric: tabular-nums; }
+  .clock .left b { color: var(--forklift); font-weight: 600; }
+  .clock .row { gap: 8px; }
+  .clock .btn { box-shadow: none; }
+  .clock .btn.ghost { color: var(--paper); border-color: var(--paper); }
+
+  .bench-section { margin-top: 26px; }
+  .bench-section > h3 {
+    margin: 0 0 12px; font-weight: 900; font-stretch: 75%; text-transform: uppercase; letter-spacing: 0.06em; font-size: 1.05rem;
+    display: flex; align-items: baseline; gap: 10px;
+  }
+  .bench-section > h3 small { font-weight: 600; font-stretch: 100%; letter-spacing: 0; text-transform: none; color: var(--ink-soft); font-size: 0.85rem; }
 
   .tags { display: grid; grid-template-columns: repeat(auto-fill, minmax(156px, 1fr)); gap: 16px; }
   .tag {
     position: relative; text-align: left; min-width: 0;
     background: var(--paper); border: 1px solid var(--paper-edge); border-radius: 6px 6px 3px 3px;
-    padding: 26px 12px 12px; box-shadow: 0 4px 10px var(--shadow);
+    padding: 24px 12px 12px; box-shadow: 0 4px 10px var(--shadow);
     display: flex; flex-direction: column; gap: 6px;
     transition: transform .15s ease, box-shadow .15s ease;
     animation: pop .45s cubic-bezier(.3,1.5,.5,1) backwards;
   }
-  .tag::before { /* hang-tag hole */
-    content: ""; position: absolute; top: 9px; left: 50%; width: 10px; height: 10px; margin-left: -5px;
+  .tag::before {
+    content: ""; position: absolute; top: 8px; left: 50%; width: 10px; height: 10px; margin-left: -5px;
     border-radius: 50%; background: var(--kraft); box-shadow: inset 0 1px 2px rgba(0,0,0,0.35);
   }
   @keyframes pop { from { opacity: 0; transform: translateY(-40px) rotate(-8deg) scale(.7); } }
   .tag:hover { transform: translateY(-3px) rotate(-0.6deg); box-shadow: 0 8px 16px var(--shadow); }
-  .tag .ico { font-size: 2.1rem; line-height: 1; }
-  .tag .nm { font-weight: 700; font-stretch: 85%; line-height: 1.15; font-size: 0.98rem; }
-  .tag .vals { margin-top: auto; display: grid; gap: 1px; font-family: var(--f-mono); font-size: 0.78rem; font-variant-numeric: tabular-nums; color: var(--ink-soft); }
+  .tag .ico { font-size: 2rem; line-height: 1; }
+  .tag .nm { font-weight: 700; font-stretch: 85%; line-height: 1.15; font-size: 0.96rem; }
+  .tag .meta { display: flex; flex-wrap: wrap; gap: 4px 6px; align-items: center; }
+  .tag .size { font-size: 0.7rem; font-weight: 700; color: var(--ink-soft); }
+  .tag .vals { margin-top: auto; font-family: var(--f-mono); font-size: 0.78rem; font-variant-numeric: tabular-nums; color: var(--ink-soft); }
   .tag .vals b { color: var(--ink); font-weight: 600; }
   .cond {
-    align-self: start; font-size: 0.66rem; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase;
+    align-self: start; font-size: 0.64rem; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase;
     border: 2px solid currentColor; padding: 1px 6px; transform: rotate(-3deg);
   }
   .cond.NEW { color: var(--gain); }
   .cond.OPEN { color: var(--ink-soft); }
-  .cond.UNTESTED { color: #b86a00; }
+  .cond.UNTESTED { color: var(--warn); }
   .cond.BROKEN { color: var(--loss); }
   .tag.jackpot { border: 3px solid var(--forklift); box-shadow: 0 0 0 3px var(--ink), 0 8px 22px rgba(242,183,5,0.55); }
   .tag.jackpot::after {
@@ -243,45 +283,125 @@
     background: var(--forklift); color: var(--ink); font-weight: 900; font-size: 0.7rem; letter-spacing: 0.12em;
     padding: 3px 7px; transform: rotate(8deg); border: 2px solid var(--ink);
   }
-  .tag.listed { transform: rotate(-1.5deg) translateY(-4px); outline: 3px solid var(--ink); outline-offset: -1px; }
-  .tag .listed-sticker {
-    position: absolute; right: 8px; top: 30px; display: none;
-    width: 54px; height: 54px; border-radius: 50%; background: var(--sticker); color: var(--paper);
-    font-weight: 900; font-stretch: 75%; font-size: 0.72rem; line-height: 1; text-transform: uppercase;
-    place-items: center; text-align: center; transform: rotate(12deg); box-shadow: 0 2px 4px var(--shadow);
+  .chip {
+    display: block; margin: 4px -12px -12px; padding: 7px 12px;
+    font-size: 0.74rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase;
+    background: var(--paper-edge); color: var(--ink-soft); border-radius: 0 0 3px 3px;
   }
-  .tag.listed .listed-sticker { display: grid; }
-  .tags.locked .tag { cursor: default; }
+  .chip.ebay    { background: var(--ch-ebay); color: var(--paper); }
+  .chip.mercari { background: var(--ch-mercari); color: var(--paper); }
+  .chip.posh    { background: var(--ch-posh); color: var(--paper); }
+  .chip.fb      { background: var(--ch-fb); color: var(--paper); }
+  .chip.bundle  { background: var(--ch-bundle); color: var(--paper); }
+  .chip.donate  { background: var(--ch-donate); color: var(--paper); }
+  .tag.planned { transform: rotate(-1deg); }
+
+  .active-list { background: var(--paper); box-shadow: 0 4px 10px var(--shadow); }
+  .active-list summary {
+    cursor: pointer; padding: 12px 14px; font-weight: 800; font-stretch: 85%; text-transform: uppercase; letter-spacing: 0.05em;
+    display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap;
+  }
+  .active-list summary span { font-family: var(--f-mono); font-weight: 400; text-transform: none; letter-spacing: 0; color: var(--ink-soft); font-size: 0.85rem; }
+  .active-list ul { list-style: none; margin: 0; padding: 0 14px 12px; display: grid; gap: 6px; }
+  .active-list li { display: grid; grid-template-columns: auto minmax(0,1fr) auto; gap: 10px; align-items: center; font-size: 0.9rem; border-top: 1px dashed var(--paper-edge); padding-top: 6px; }
+  .active-list li .where { font-family: var(--f-mono); font-size: 0.75rem; color: var(--ink-soft); text-align: right; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+
+  /* ---------- Bottom sheet: where does it sell? ---------- */
+  .scrim { position: fixed; inset: 0; background: var(--scrim); z-index: 40; animation: fade .2s ease; }
+  @keyframes fade { from { opacity: 0; } }
+  .sheet {
+    position: fixed; z-index: 41; left: 50%; bottom: 0; transform: translateX(-50%);
+    width: min(560px, 100%); max-height: 88vh; overflow-y: auto; overscroll-behavior: contain;
+    background: var(--paper); border-radius: 14px 14px 0 0;
+    padding: 18px 16px calc(18px + env(safe-area-inset-bottom, 0px));
+    box-shadow: 0 -10px 30px rgba(0,0,0,0.3);
+    animation: rise .25s cubic-bezier(.2,.9,.3,1);
+  }
+  @keyframes rise { from { transform: translate(-50%, 40px); opacity: 0; } }
+  .sheet-head { display: grid; grid-template-columns: auto minmax(0,1fr) auto; gap: 12px; align-items: start; }
+  .sheet-head .ico { font-size: 2.4rem; line-height: 1; }
+  .sheet-head h3 { margin: 0; font-weight: 800; font-stretch: 85%; font-size: 1.25rem; line-height: 1.15; }
+  .sheet-head .sub { font-size: 0.85rem; color: var(--ink-soft); margin-top: 4px; display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: center; }
+  .x { border: 0; background: transparent; font-size: 1.6rem; line-height: 1; padding: 0 4px; }
+  .comps {
+    margin: 14px 0 0; display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 8px;
+    font-family: var(--f-mono); font-size: 0.8rem; font-variant-numeric: tabular-nums;
+  }
+  .comps div { background: var(--kraft-line); padding: 8px; }
+  .comps small { display: block; font-family: var(--f-body); font-size: 0.62rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-soft); }
+  .test-row {
+    margin-top: 14px; display: flex; gap: 12px; align-items: center; justify-content: space-between; flex-wrap: wrap;
+    border: 2px dashed var(--warn); padding: 10px 12px; color: var(--ink);
+  }
+  .test-row p { margin: 0; font-size: 0.88rem; flex: 1 1 220px; }
+  .test-result { margin-top: 14px; padding: 10px 12px; font-weight: 700; }
+  .test-result.good { background: rgba(35,116,63,0.12); color: var(--gain); }
+  .test-result.bad { background: rgba(179,38,30,0.10); color: var(--loss); }
+  .seg-h { margin: 18px 0 6px; font-size: 0.68rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-soft); }
+  .seg { display: grid; grid-template-columns: repeat(3, 1fr); border: 2px solid var(--ink); border-radius: 6px; overflow: hidden; }
+  .seg button { border: 0; background: transparent; padding: 8px 4px; font-weight: 800; font-stretch: 85%; font-size: 0.82rem; line-height: 1.15; }
+  .seg button + button { border-left: 2px solid var(--ink); }
+  .seg button small { display: block; font-weight: 500; font-size: 0.7rem; color: var(--ink-soft); }
+  .seg button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+  .seg button[aria-pressed="true"] small { color: var(--paper-edge); }
+  .opts { display: grid; gap: 8px; margin-top: 14px; }
+  .opt {
+    position: relative; text-align: left; width: 100%;
+    display: grid; grid-template-columns: 8px minmax(0,1fr) auto; gap: 4px 12px; align-items: center;
+    background: var(--paper); border: 2px solid var(--paper-edge); border-radius: 8px; padding: 10px 12px 10px 0;
+    overflow: hidden;
+  }
+  .opt:hover:not([disabled]) { border-color: var(--ink); }
+  .opt .stripe { grid-row: 1 / span 3; align-self: stretch; }
+  .opt .t { font-weight: 800; font-stretch: 85%; font-size: 1rem; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .opt .n { font-family: var(--f-mono); font-weight: 600; font-variant-numeric: tabular-nums; text-align: right; }
+  .opt .n.neg { color: var(--loss); }
+  .opt .d { grid-column: 2 / span 2; font-size: 0.8rem; color: var(--ink-soft); font-family: var(--f-mono); }
+  .opt .w { grid-column: 2 / span 2; font-size: 0.8rem; display: grid; gap: 2px; }
+  .opt .w .bad { color: var(--loss); }
+  .opt .w .good { color: var(--gain); }
+  .opt .w .meh { color: var(--ink-soft); }
+  .opt[aria-pressed="true"] { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); background: #fffdf6; }
+  .opt[disabled] { opacity: 0.5; cursor: not-allowed; }
+  .pro {
+    font-size: 0.62rem; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase;
+    background: var(--forklift); color: var(--ink); padding: 2px 6px; border-radius: 3px;
+  }
+  .picked { font-size: 0.62rem; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase; background: var(--ink); color: var(--paper); padding: 2px 6px; border-radius: 3px; }
+  .sheet-foot { margin-top: 14px; display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
 
   /* ---------- Receipt ---------- */
-  .ledger-wrap { display: grid; grid-template-columns: minmax(0, 420px) minmax(0, 1fr); gap: 32px; align-items: start; margin-top: 28px; }
+  .ledger-wrap { display: grid; grid-template-columns: minmax(0, 440px) minmax(0, 1fr); gap: 32px; align-items: start; margin-top: 28px; }
   .receipt {
     position: relative; background: var(--paper); padding: 22px 20px 30px;
-    font-family: var(--f-mono); font-size: 0.86rem; font-variant-numeric: tabular-nums;
+    font-family: var(--f-mono); font-size: 0.84rem; font-variant-numeric: tabular-nums;
     box-shadow: 0 10px 22px var(--shadow);
-    --zig: linear-gradient(135deg, var(--paper) 50%, transparent 50%) 0 0 / 12px 12px repeat-x,
-           linear-gradient(225deg, var(--paper) 50%, transparent 50%) 0 0 / 12px 12px repeat-x;
   }
   .receipt::after {
     content: ""; position: absolute; left: 0; right: 0; bottom: -12px; height: 12px;
-    background: var(--zig);
+    background:
+      linear-gradient(135deg, var(--paper) 50%, transparent 50%) 0 0 / 12px 12px repeat-x,
+      linear-gradient(225deg, var(--paper) 50%, transparent 50%) 0 0 / 12px 12px repeat-x;
   }
   .receipt h3 { margin: 0 0 2px; text-align: center; font-family: var(--f-body); font-weight: 900; font-stretch: 70%; font-size: 1.4rem; letter-spacing: 0.06em; }
   .receipt .sub { text-align: center; color: var(--ink-soft); margin-bottom: 14px; }
-  .receipt .ln { display: flex; justify-content: space-between; gap: 12px; padding: 2px 0; animation: print .25s ease both; }
+  .receipt .grp { margin: 10px 0 4px; font-family: var(--f-body); font-weight: 800; font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-soft); }
+  .receipt .ln { display: flex; justify-content: space-between; gap: 12px; padding: 2px 0; animation: print .25s ease backwards; }
   .receipt .ln span:first-child { min-width: 0; overflow-wrap: anywhere; }
   .receipt .ln span:last-child { flex: none; }
-  .receipt .ln.dim { color: var(--ink-soft); padding-left: 1.2em; font-size: 0.8rem; }
+  .receipt .ln.dim { color: var(--ink-soft); padding-left: 1.2em; font-size: 0.78rem; }
   .receipt .ln.neg span:last-child { color: var(--loss); }
   .receipt .ln.pos span:last-child { color: var(--gain); }
+  .receipt .ln.zero span:last-child { color: var(--ink-soft); }
   .receipt .rule { border-top: 2px dashed var(--ink-soft); margin: 10px 0; }
-  .receipt .ln.big { font-weight: 600; font-size: 1.05rem; }
+  .receipt .ln.big { font-weight: 600; font-size: 1.02rem; }
   @keyframes print { from { opacity: 0; transform: translateY(-4px); } }
   .stamp {
-    position: absolute; right: 18px; bottom: 78px;
+    display: block; width: fit-content; margin: 16px auto 0;
     font-family: var(--f-body); font-weight: 900; font-stretch: 70%; font-size: 1.7rem; letter-spacing: 0.08em;
     padding: 2px 10px; border: 4px solid currentColor; border-radius: 6px; transform: rotate(-14deg);
-    opacity: 0.85; mix-blend-mode: multiply;
+    opacity: 0.85; mix-blend-mode: multiply; pointer-events: none;
     animation: slam .35s cubic-bezier(.3,1.6,.5,1) .5s backwards;
   }
   .stamp.pos { color: var(--gain); }
@@ -289,12 +409,12 @@
   @keyframes slam { from { opacity: 0; transform: rotate(-14deg) scale(2.2); } }
 
   .sticky-note {
-    background: #fff27a; color: var(--ink); padding: 18px 18px 20px; max-width: 360px;
+    background: #fff27a; color: var(--ink); padding: 18px 18px 20px; max-width: 380px;
     transform: rotate(1.5deg); box-shadow: 0 8px 16px var(--shadow);
-    font-family: var(--f-marker); font-size: 1.15rem; line-height: 1.35;
+    font-family: var(--f-marker); font-size: 1.12rem; line-height: 1.35;
   }
   .sticky-note small { display: block; font-family: var(--f-body); font-weight: 800; font-size: 0.7rem; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 6px; color: var(--ink-soft); }
-  .side { display: grid; gap: 22px; justify-items: start; }
+  .side { display: grid; gap: 22px; justify-items: start; min-width: 0; }
 
   /* ---------- End ---------- */
   .end { text-align: left; margin-top: 36px; display: grid; gap: 22px; }
@@ -304,23 +424,34 @@
     font-size: clamp(1.4rem, 4vw, 2rem); background: var(--sticker); color: var(--paper);
     padding: 6px 16px; transform: rotate(-1.5deg); box-shadow: 4px 4px 0 var(--ink);
   }
-  .end-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; max-width: 760px; }
+  .end-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; max-width: 820px; }
   .end-stats div { background: var(--paper); padding: 12px 14px; box-shadow: 0 3px 8px var(--shadow); min-width: 0; }
   .end-stats small { display: block; font-size: 0.68rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-soft); }
-  .end-stats b { font-family: var(--f-mono); font-size: 1.1rem; font-weight: 600; overflow-wrap: anywhere; }
+  .end-stats b { font-family: var(--f-mono); font-size: 1.05rem; font-weight: 600; overflow-wrap: anywhere; }
   .copy-out { font-family: var(--f-mono); font-size: 0.8rem; background: var(--paper); padding: 10px 12px; max-width: 760px; white-space: pre-wrap; display: none; }
   .copy-out.show { display: block; }
 
-  .credit { margin-top: 48px; font-size: 0.85rem; color: var(--ink-soft); }
+  .credit { margin-top: 48px; font-size: 0.85rem; color: var(--ink-soft); max-width: 70ch; }
   .credit a { color: var(--ink); }
 
   @media (max-width: 720px) {
     .intro, .ledger-wrap { grid-template-columns: minmax(0, 1fr); }
     .intro .box-stage { order: -1; padding-top: 10px; }
     .tags { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
-    .bar-inner { gap: 6px 16px; }
+    .bar-inner { gap: 4px 16px; }
     .logo { font-size: 1.4rem; width: 100%; }
-    .stamp { font-size: 1.3rem; bottom: 74px; }
+    .bar-inner { gap: 2px 14px; }
+    .stat b { font-size: 0.92rem; }
+    .cash b { font-size: 1.15rem; }
+    .clock {
+      position: fixed; top: auto; left: 0; right: 0; bottom: 0; margin: 0; z-index: 20;
+      padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px));
+      box-shadow: 0 -4px 14px var(--shadow);
+    }
+    .clock .meter { width: 100%; }
+    .clock .summary { display: none; }
+    .clock .row { width: 100%; }
+    .clock .row .btn { flex: 1; }
   }
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation-duration: 0.01ms !important; animation-delay: 0ms !important; transition-duration: 0.01ms !important; }
@@ -329,14 +460,15 @@
 </head>
 <body>
 <div class="wrap">
-  <header class="bar" aria-label="Game status">
+  <header class="bar" id="topbar" aria-label="Game status">
     <div class="bar-inner" id="bar">
       <a class="logo" href="#" id="logo">Pallet <span>Rip</span></a>
     </div>
   </header>
   <main id="stage" aria-live="polite"></main>
-  <p class="credit">Made for fun by <a href="https://robertsdkyle.com/">Kyle D. Roberts</a>, who has actually opened a lot of these. Real pallets: <a href="https://www.youtube.com/@LongIslandLiquidation" target="_blank" rel="noopener">Long Island Liquidation</a>.</p>
+  <p class="credit">Made for fun by <a href="https://robertsdkyle.com/">Kyle D. Roberts</a>, who has actually opened a lot of these. The rules of thumb come from his guide <i>Pallets to Profit</i>. Real pallets: <a href="https://www.youtube.com/@LongIslandLiquidation" target="_blank" rel="noopener">Long Island Liquidation</a>.</p>
 </div>
+<div id="sheet-root"></div>
 
 <script>
 (function () {
@@ -345,31 +477,60 @@
   /* =========================================================
      TUNING
      ========================================================= */
-  const START_CASH = 600, DAYS = 10, RENT = 40, BASE_SLOTS = 4;
-  const EBAY_FEE = 0.1325, EBAY_ORDER_FEE = 0.30, PACKING = 3;
-  const DOA_RATE = 0.3;      // untested items that turn out dead
-  const YARD_RATE = 0.35;    // dollar-table price as a share of low value
+  const START_CASH = 600, DAYS = 10;
+  const DAY_MIN = 360;                       // six working hours a day
+  const BASE_RENT = 40, OVERFLOW_AT = 30, OVERFLOW_RENT = 25;
+  const TEST_MIN = 20, BUNDLE_MIN = 30;
+  const DOA_RATE = 0.3;                      // untested items that are actually dead
+  const NO_SHOW = 0.12, NO_SHOW_RAIN = 0.3;
+  const UPSELL = 0.18;                       // "if they don't see it, they can't buy it"
+  const SCAM_RATE = 0.2, SCAM_FEEDBACK = 5, SCAM_PRICE = 150;
+  const TIME_VALUE = 15 / 60;                // $/minute, used only for the Pro pick
+
+  const SHIP = { S: 6, M: 14, L: 38 };
+  const SIZE_LABEL = { S: 'Ships small', M: 'Medium box', L: 'Bulky' };
 
   const COND = {
-    NEW:      { label: 'New',        mult: 1.00 },
-    OPEN:     { label: 'Open box',   mult: 0.75 },
-    UNTESTED: { label: 'Untested',   mult: 0.75 },
-    BROKEN:   { label: 'For parts',  mult: 0.12 }
+    NEW:      { label: 'New',       mult: 1.00 },
+    OPEN:     { label: 'Open box',  mult: 0.75 },
+    UNTESTED: { label: 'Untested',  mult: 0.75 },
+    BROKEN:   { label: 'For parts', mult: 0.12 }
   };
 
+  const PRICING = {
+    move:   { label: 'Price to move', hint: '−15%, sells fast', mult: 0.85, speed: 1.5 },
+    market: { label: 'Market',        hint: 'sold comps',       mult: 1.00, speed: 1.0 },
+    top:    { label: 'Top dollar',    hint: '+15%, slow',       mult: 1.15, speed: 0.55 }
+  };
+  const TIER_SPEED = { dud: 0.5, common: 0.62, good: 0.5, jackpot: 0.42 };
+
+  const CH = {
+    ebay:    { name: 'eBay',           kind: 'online', fee: 0.1325, flat: 0.30, mult: 1.00, speed: 1.0,  ships: true,  color: 'var(--ch-ebay)' },
+    mercari: { name: 'Mercari',        kind: 'online', fee: 0.10,   flat: 0.50, mult: 0.88, speed: 0.8,  ships: true,  color: 'var(--ch-mercari)' },
+    posh:    { name: 'Poshmark',       kind: 'online', fee: 0.20,   flat: 0,    mult: 1.05, speed: 0.85, ships: false, color: 'var(--ch-posh)', apparel: true },
+    fb:      { name: 'FB Marketplace', kind: 'local',  color: 'var(--ch-fb)' },
+    bundle:  { name: 'Bundle lot',     kind: 'bundle', color: 'var(--ch-bundle)' },
+    donate:  { name: 'Donate',         kind: 'donate', color: 'var(--ch-donate)' }
+  };
+  const CH_ORDER = ['ebay', 'mercari', 'posh', 'fb', 'bundle', 'donate'];
+
   const GRADES = {
-    A: { name: 'Shelf pulls', sources: ['Target Overstock', 'Walmart Shelf Pulls', 'Costco Excess'],
-         cond: [['NEW', 60], ['OPEN', 35], ['UNTESTED', 5]],
+    A: { name: 'Shelf pulls', sources: ['Target Shelf Pulls', 'Walmart Shelf Pulls', 'Costco Excess'],
+         cond: [['NEW', 65], ['OPEN', 30], ['UNTESTED', 5]],
          tier: [['dud', 15], ['common', 57], ['good', 25], ['jackpot', 3]],
-         factor: [0.72, 0.95], manifest: true },
+         factor: [0.55, 0.8], manifest: true },
     B: { name: 'Customer returns', sources: ['Amazon Returns', 'Home Depot Returns', 'Best Buy Returns'],
          cond: [['NEW', 20], ['OPEN', 35], ['UNTESTED', 35], ['BROKEN', 10]],
-         tier: [['dud', 32], ['common', 45], ['good', 20], ['jackpot', 3]],
-         factor: [0.58, 1.02], manifest: true },
+         tier: [['dud', 30], ['common', 45], ['good', 21], ['jackpot', 4]],
+         factor: [0.45, 0.85], manifest: true },
+    U: { name: 'Undeliverable mail', sources: ['USPS Undeliverables', 'Lost Parcel Lot', 'Carrier Overstock'],
+         cond: [['NEW', 50], ['OPEN', 38], ['UNTESTED', 12]],
+         tier: [['dud', 35], ['common', 35], ['good', 22], ['jackpot', 8]],
+         factor: [0.4, 0.95], manifest: false },
     C: { name: 'Salvage', sources: ['Unmanifested Truckload', 'Freight Claims', 'Mystery Salvage'],
          cond: [['NEW', 8], ['OPEN', 22], ['UNTESTED', 42], ['BROKEN', 28]],
          tier: [['dud', 42], ['common', 33], ['good', 19], ['jackpot', 6]],
-         factor: [0.42, 1.05], manifest: false }
+         factor: [0.35, 0.9], manifest: false }
   };
 
   const SIZES = {
@@ -378,46 +539,75 @@
     L: { name: 'Gaylord box',  n: [15, 20] }
   };
 
-  // [icon, name, low, high]
+  const GOOD_TELLS = ['Shrink-wrap intact', 'Square, stable stack', 'Clean retail boxes', 'Everyday items visible', 'No return labels'];
+  const BAD_TELLS  = ['Crushed corners', 'Return labels everywhere', 'Heavy dirt', 'Torn boxes', 'Leaning stack', 'Loose stuff on top'];
+
+  // [icon, name, low, high, size]  low/high = sold comps for a new one, shipped
   const CATALOG = {
     'Electronics': {
       dud:     [['🎧','Single AirPod (left)',8,15],['📱','iPhone 6 cases, lot of 47',3,10],['🔌','Tangle of USB-C cables',4,12],['📺','TV remote, brand unknown',2,6],['🖱️','Wireless mouse, no dongle',3,8]],
       common:  [['🔊','JBL Flip 5 speaker',45,70],['⌚','Fitbit Inspire 3',40,60],['🎮','Xbox wireless controller',30,45],['💡','Smart bulb 4-pack',20,35],['🔔','Ring video doorbell',50,80],['🎙️','USB podcast mic',35,55]],
-      good:    [['🎧','Bose QC45 headphones',140,200],['📱','iPad 9th gen',180,240],['🖥️','27-inch 4K monitor',150,220],['🚁','DJI Mini drone',200,300]],
-      jackpot: [['💻','MacBook Air M2',600,800],['📸','Sony a6400 camera body',500,650],['🥽','Meta Quest 3',350,450],['🎮','Nintendo Switch OLED',260,320]]
+      good:    [['🎧','Bose QC45 headphones',140,200],['📱','iPad 9th gen',180,240],['🖥️','27-inch 4K monitor',150,220,'L'],['🚁','DJI Mini drone',200,300,'M']],
+      jackpot: [['💻','MacBook Air M2',600,800,'M'],['📸','Sony a6400 camera body',500,650],['🥽','Meta Quest 3',350,450,'M'],['🎮','Nintendo Switch OLED',260,320,'M']]
     },
     'Home & Kitchen': {
       dud:     [['🫙','Mismatched Tupperware lids',1,4],['🕯️','Pumpkin spice candle',2,6],['🪴','Fake succulent, sun-faded',1,4],['🛁','Shower curtain, opened',3,8],['🧽','Sponges. So many sponges.',2,6]],
-      common:  [['🍳','5-qt air fryer',40,65],['☕','Keurig K-Mini',35,55],['🔪','Knife block set',30,50],['🛏️','Queen sheet set',20,35],['🧹','Shark handheld vac',50,75],['🍲','Instant Pot Duo',55,80]],
-      good:    [['🤖','Roomba i3',150,220],['☕','Nespresso Vertuo',100,150],['🥤','Vitamix blender',180,260],['🍦','Ninja Creami',120,160]],
-      jackpot: [['🌀','Dyson V15 Detect',380,520],['🎂','KitchenAid Artisan mixer',220,320],['☕','Breville Barista Express',400,550]]
+      common:  [['🍳','5-qt air fryer',40,65,'M'],['☕','Keurig K-Mini',35,55,'M'],['🔪','Knife block set',30,50,'M'],['🛏️','Queen sheet set',20,35],['🧹','Shark handheld vac',50,75,'M'],['🍲','Instant Pot Duo',55,80,'M'],['🛋️','Throw pillow, 3-pack',20,35,'M']],
+      good:    [['🤖','Roomba i3',150,220,'M'],['☕','Nespresso Vertuo',100,150,'M'],['🥤','Vitamix blender',180,260,'M'],['🍦','Ninja Creami',120,160,'M']],
+      jackpot: [['🌀','Dyson V15 Detect',380,520,'M'],['🎂','KitchenAid Artisan mixer',220,320,'L'],['☕','Breville Barista Express',400,550,'L']]
     },
-    'Toys & Games': {
+    'Toys & Sports': {
       dud:     [['🧸','Plush with one eye',1,3],['🧩','Puzzle, 999 of 1,000 pieces',1,4],['🌀','Fidget spinners, lot of 60',5,12],['🎲','Board game, no box',2,6],['🪀','Yo-yo, hopelessly tangled',1,3]],
-      common:  [['🏎️','Hot Wheels track set',20,35],['🎲','Catan',25,40],['🐸','Squishmallow, 16-inch',15,30],['🧱','LEGO City set',25,45],['🎯','Nerf blaster',20,35]],
-      good:    [['🧱','LEGO Technic Porsche',120,170],['🃏','Pokémon booster box',110,160],['🛴','Kids electric scooter',90,140]],
-      jackpot: [['🛸','LEGO UCS Millennium Falcon',650,850],['🔥','PSA 9 Charizard card',300,500],['🏰','LEGO Hogwarts Castle',330,420]]
+      common:  [['🏎️','Hot Wheels track set',20,35,'M'],['🎲','Catan',25,40],['🐸','Squishmallow, 16-inch',15,30,'M'],['🧱','LEGO City set',25,45],['🎯','Nerf blaster',20,35,'M'],['⛳','Golf bag',60,90,'L']],
+      good:    [['🧱','LEGO Technic Porsche',120,170,'M'],['🃏','Pokémon booster box',110,160],['🛴','Kids electric scooter',90,140,'L'],['🧊','Yeti Tundra 45 cooler',180,250,'L']],
+      jackpot: [['🛸','LEGO UCS Millennium Falcon',650,850,'L'],['🔥','PSA 9 Charizard card',300,500],['🏰','LEGO Hogwarts Castle',330,420,'L']]
     },
     'Tools': {
       dud:     [['🔩','Bag of assorted screws',2,5],['🪛','Screwdriver, missing tip',1,3],['🧤','Work gloves, all left hand',1,4],['📏','Tape measure, won\'t retract',1,3]],
-      common:  [['🔦','Rechargeable work light',20,35],['🪚','Ryobi circular saw',40,60],['🧰','120-piece socket set',35,55],['🔋','DeWalt 20V battery',45,70]],
-      good:    [['🛠️','Milwaukee M18 impact driver',110,150],['💨','Pancake air compressor',80,120],['🔨','Makita rotary hammer',140,200]],
-      jackpot: [['🧰','DeWalt 6-tool combo kit',380,520],['🌿','EGO 56V lawn mower',350,450],['⚡','Portable generator',500,700]]
+      common:  [['🔦','Rechargeable work light',20,35],['🪚','Ryobi circular saw',40,60,'M'],['🧰','120-piece socket set',35,55,'M'],['🔋','DeWalt 20V battery',45,70]],
+      good:    [['🛠️','Milwaukee M18 impact driver',110,150],['💨','Pancake air compressor',80,120,'L'],['🔨','Makita rotary hammer',140,200,'M']],
+      jackpot: [['🧰','DeWalt 6-tool combo kit',380,520,'L'],['🌿','EGO 56V lawn mower',350,450,'L'],['⚡','Portable generator',500,700,'L']]
+    },
+    'Apparel': {
+      dud:     [['🧦','Novelty socks, lot of 30',3,8],['🎃','Kids costume, size M',3,8],['🩴','Single Croc',1,2],['👔','Belt, no buckle',1,3]],
+      common:  [['👕','Nike Dri-FIT tees, lot of 3',20,35],['👖','Levi\'s 501 jeans',25,40],['🧢','Carhartt beanie',12,20],['🧥','Under Armour hoodie',25,40]],
+      good:    [['🩱','Lululemon Align leggings',50,75],['🧶','Patagonia Better Sweater',70,100],['🧥','North Face Nuptse jacket',150,220,'M']],
+      jackpot: [['👟','Jordan 4 Retro, size 10',250,380,'M'],['🧥','Canada Goose parka',450,650,'M'],['🧥','Arc\'teryx Beta AR shell',300,420]]
     }
   };
   const CATS = Object.keys(CATALOG);
-  const LOT_CATS = CATS.concat(['General merch']);
+  const LOT_CATS = CATS.concat(['General merch', 'General merch']);
+
+  // From the guide, "Pallets to Profit"
+  const TIPS = {
+    paid:    'You don\'t get paid when you buy inventory. You get paid when it sells.',
+    tells:   'Pallets usually tell on themselves. Torn boxes, heavy dirt, crushed corners and lots of return labels usually mean more work and more surprises.',
+    rule25:  'The 25% rule: on online marketplaces, aim to spend no more than 25% of the sale price, shipped, on the item.',
+    golf:    'Large items are not always worth shipping. A $13 golf bag sells for about $90 on eBay and $50 on Marketplace. The box alone is $6. It sold on Marketplace the next day.',
+    open:    'Open box does not mean complete. Missing parts kill value fast, and even a missing manual can trigger an INAD return.',
+    test:    'Test beyond "it turns on." Run the espresso machine, let the ice maker make ice, run the vacuum for a few minutes.',
+    bundle:  'Bundling is a beginner superpower. Avoid listing items under $10 on their own. Group them into themed lots.',
+    feedback:'Early on, fight for feedback harder than you fight for profit. Don\'t list very expensive items right away.',
+    curb:    'Free is undefeated. Don\'t overlook curb alerts.',
+    see:     'If they don\'t see it, they can\'t buy it. Bring one or two related items to the meetup.',
+    meetup:  'Schedule meetups so you still win if the buyer flakes. Don\'t leave until they confirm they\'re on the way.',
+    sort:    'Reselling is really a sorting business. Fast Cash, Standard List, Bundle, Parts, Donate.',
+    retail:  'Retail value is not resale value. Trust sold comps, not the MSRP on the manifest.',
+    review:  'Don\'t buy another pallet before you review the first one.',
+    speed:   'Speed matters. The faster you sort, test and list, the faster inventory turns back into cash.'
+  };
 
   const EVENTS = [
-    { w: 3, text: 'Your unboxing short hit 412K views. eBay sales run 25% higher tomorrow.', apply: s => { s.mods.hype = 1.25; } },
-    { w: 3, text: 'Buyer says the item "smelled weird." eBay sided with the buyer.', cash: -35 },
-    { w: 2, text: 'Neighbor bought everything left on the dollar table for a flat $60.', cash: 60 },
-    { w: 2, text: 'Found a folded $20 inside a returned purse.', cash: 20 },
-    { w: 2, text: 'Your cousin starts shooting listing photos for you. One more eBay slot, for good.', ok: s => s.slots < BASE_SLOTS + 2, apply: s => { s.slots += 1; } },
-    { w: 2, text: 'Rain all weekend. Tomorrow\'s yard sale pays half.', apply: s => { s.mods.yard = 0.5; } },
-    { w: 2, text: 'eBay raised promoted-listing rates. Fees are 16% tomorrow.', apply: s => { s.mods.fee = 0.16; } },
-    { w: 2, text: 'Forklift rental ran long.', cash: -25 },
-    { w: 2, text: 'A broker you know offers first dibs. Tomorrow\'s lots are 15% off.', apply: s => { s.mods.discount = 0.85; } }
+    { w: 3, text: 'Your unboxing short hit 412K views. Online listings sell faster and for 15% more tomorrow.', apply: s => { s.nextMods.hype = true; } },
+    { w: 2, curb: true, text: 'Curb alert two streets over. You grabbed a {item} for free. Free is undefeated.' },
+    { w: 2, text: 'A Reddit thread showed you a faster listing flow. eBay listings take 20 minutes from now on.', ok: s => s.up.ebayMin > 20, apply: s => { s.up.ebayMin = 20; } },
+    { w: 2, text: 'You bought a $30 lightbox. Better photos, so online listings sell faster from now on.', cash: -30, ok: s => s.up.photo === 1, apply: s => { s.up.photo = 1.15; } },
+    { w: 2, text: 'You moved to a storage unit on your commute. Meetups take 30 minutes from now on.', ok: s => s.up.fbMin > 30, apply: s => { s.up.fbMin = 30; } },
+    { w: 2, text: 'Rain in tomorrow\'s forecast. Expect more Marketplace no-shows.', apply: s => { s.nextMods.rain = true; } },
+    { w: 2, text: 'A buyer says the manual was missing. eBay sided with them. Open box does not mean complete.', cash: -30, ok: s => s.stats.onlineSales > 0 },
+    { w: 1, text: 'The dumpster company charged you for cardboard overflow.', cash: -20 },
+    { w: 2, text: 'A broker you know offers first dibs. Tomorrow\'s lots are 15% off.', apply: s => { s.nextMods.discount = 0.85; } },
+    { w: 1, text: 'A Marketplace regular asks what else you get in. Tomorrow\'s meetups all show up.', apply: s => { s.nextMods.reliable = true; } }
   ];
 
   const RANKS = [
@@ -441,68 +631,163 @@
     for (const p of pairs) { if ((r -= p[1]) < 0) return p[0]; }
     return pairs[pairs.length - 1][0];
   };
-  const money = (n, cents) => {
-    const sign = n < 0 ? '−' : '';
-    const v = Math.abs(n);
-    return sign + '$' + (cents ? v.toFixed(2) : Math.round(v).toLocaleString('en-US'));
-  };
+  const money = n => (n < 0 ? '−' : '') + '$' + Math.round(Math.abs(n)).toLocaleString('en-US');
   const signed = n => (n >= 0 ? '+' : '') + money(n);
   const round5 = n => Math.max(5, Math.round(n / 5) * 5);
+  const hm = m => { m = Math.max(0, Math.round(m)); const h = Math.floor(m / 60), r = m % 60; return h ? `${h}h${r ? ' ' + r + 'm' : ''}` : `${r}m`; };
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const wait = ms => new Promise(r => setTimeout(r, reduced ? 0 : ms));
 
   /* =========================================================
-     ECONOMY
+     ITEMS & VALUES
      ========================================================= */
   let uid = 0;
-  function makeItem(cat, grade) {
+  function makeItem(cat, grade, day) {
     const c = cat === 'General merch' ? pick(CATS) : cat;
     const tier = weighted(GRADES[grade].tier);
-    const [icon, name, low, high] = pick(CATALOG[c][tier]);
+    const [icon, name, low, high, size] = pick(CATALOG[c][tier]);
     const cond = weighted(GRADES[grade].cond);
-    return { id: ++uid, icon, name, low, high, tier, cond };
+    return {
+      id: ++uid, icon, name, cat: c, tier, low, high, size: size || 'S', cond,
+      dead: cond === 'UNTESTED' && Math.random() < DOA_RATE,
+      status: 'shelf', from: day, plan: null, listed: null
+    };
   }
-  function makeItems(cat, grade, size) {
+  function makeItems(cat, grade, size, day) {
     const n = randi(...SIZES[size].n), out = [];
-    for (let i = 0; i < n; i++) out.push(makeItem(cat, grade));
+    for (let i = 0; i < n; i++) out.push(makeItem(cat, grade, day));
     return out;
   }
-  const valRange = it => [it.low * COND[it.cond].mult, it.high * COND[it.cond].mult];
-  const yardValue = (it, mult = 1) => Math.max(1, Math.round(it.low * COND[it.cond].mult * YARD_RATE * mult));
-  function ebayExpected(it, fee = EBAY_FEE) {
-    const [lo, hi] = valRange(it), mid = (lo + hi) / 2;
-    const gross = it.cond === 'UNTESTED' ? (1 - DOA_RATE) * mid + DOA_RATE * it.low * 0.15 : mid;
-    return gross * (1 - fee) - EBAY_ORDER_FEE - PACKING;
+  const cmult = it => COND[it.cond].mult;
+  const range = it => [it.low * cmult(it), it.high * cmult(it)];
+  const midv = it => (it.low + it.high) / 2 * cmult(it);
+  const shipCost = it => it.ship != null ? it.ship : SHIP[it.size];
+  const isApparel = it => it.cat === 'Apparel';
+
+  function onlinePrice(it, ch, pricing, r) {
+    const [a, b] = range(it);
+    return (a + (b - a) * r) * PRICING[pricing].mult * CH[ch].mult;
   }
-  // Best-play value of a set of items given N listing slots.
-  function bestValue(items, slots) {
-    const gains = items.map(it => ebayExpected(it) - yardValue(it)).sort((a, b) => b - a);
-    const yard = items.reduce((s, it) => s + yardValue(it), 0);
-    return yard + gains.slice(0, slots).filter(g => g > 0).reduce((s, g) => s + g, 0);
+  function onlineNet(it, ch, price) {
+    const c = CH[ch];
+    return price * (1 - c.fee) - c.flat - (c.ships ? shipCost(it) : 0);
+  }
+  function sellChance(it, ch, pricing, s) {
+    s = s || state;
+    const fbF = 0.75 + Math.min(s.feedback, 25) * 0.01;
+    const hype = s.mods.hype ? 1.25 : 1;
+    return Math.min(0.95, TIER_SPEED[it.tier] * PRICING[pricing].speed * CH[ch].speed * fbF * s.up.photo * hype);
+  }
+  const fbRange = it => { const m = midv(it); return [m * 0.5, m * 0.72]; };
+  const bundleShare = it => midv(it) * 0.6 * (1 - CH.ebay.fee) - 3;
+
+  // Evaluate one way of selling an item. Used by the sheet, the Pro pick and lot pricing.
+  function evalOption(it, ch, pricing, s) {
+    s = s || state;
+    const c = CH[ch];
+    const res = { ch, ok: true, notes: [], time: 0, exp: 0, lo: 0, hi: 0, when: '' };
+    if (c.kind === 'online') {
+      res.time = ch === 'ebay' ? s.up.ebayMin : 15;
+      if (c.apparel && !isApparel(it)) { res.ok = false; res.why = 'Poshmark is for apparel and shoes.'; return res; }
+      res.lo = onlineNet(it, ch, onlinePrice(it, ch, pricing, 0));
+      res.hi = onlineNet(it, ch, onlinePrice(it, ch, pricing, 1));
+      let exp = (res.lo + res.hi) / 2;
+      if (it.cond === 'UNTESTED') {
+        exp = (1 - DOA_RATE) * exp - DOA_RATE * (c.ships ? shipCost(it) * 2 : 8);
+        res.notes.push(['bad', 'Untested: if it\'s dead, the buyer files an INAD return and you eat shipping both ways.']);
+      }
+      const p = sellChance(it, ch, pricing, s);
+      res.days = Math.max(1, Math.round(1 / p));
+      res.when = res.days <= 1 ? 'likely sells tonight' : `sells in ~${res.days} days`;
+      if (c.ships && it.size === 'L') res.notes.push(['bad', `Bulky: the label alone is ${money(SHIP.L)}. Local might net more.`]);
+      if (res.hi < 10 && it.cond !== 'BROKEN') res.notes.push(['bad', 'Under $10 after fees and shipping. Bundle it instead.']);
+      if (it.cond === 'BROKEN') res.notes.push(['meh', 'Listed "for parts or not working."']);
+      if (s.feedback < SCAM_FEEDBACK && onlinePrice(it, ch, pricing, 0.5) > SCAM_PRICE) {
+        res.notes.push(['bad', `New seller with ${s.feedback} feedback and a high-dollar item. Scammers love that combo.`]);
+        exp -= SCAM_RATE * (exp + shipCost(it));
+      }
+      if (c.apparel) res.notes.push(['good', 'Apparel sells best here. Buyer pays shipping.']);
+      if (ch === 'mercari') res.notes.push(['meh', 'Quicker to list, lower prices, slower sales.']);
+      if (it.cond === 'OPEN' && c.kind === 'online') res.notes.push(['meh', 'Open box: list it as used, not new.']);
+      res.exp = exp * Math.min(1, (p * 3)); // a listing that sits ties up cash
+    } else if (c.kind === 'local') {
+      res.time = s.up.fbMin;
+      [res.lo, res.hi] = fbRange(it);
+      let exp = (res.lo + res.hi) / 2 * (1 - NO_SHOW);
+      if (it.cond === 'UNTESTED') { exp *= (1 - DOA_RATE); res.notes.push(['bad', 'Buyer will test it at pickup. If it\'s dead, they walk.']); }
+      res.when = 'cash today';
+      if (it.size === 'L') res.notes.push(['good', 'Bulky stuff sells best locally. No box, no label.']);
+      res.notes.push(['meh', `Expect lowballers. ${Math.round(NO_SHOW * 100)}% chance of a no-show.`]);
+      res.exp = exp;
+    } else if (c.kind === 'bundle') {
+      const others = s.inv.filter(x => x.status === 'shelf' && x.plan && x.plan.ch === 'bundle' && x.id !== it.id);
+      res.time = others.length ? 0 : BUNDLE_MIN;
+      res.lo = res.hi = res.exp = bundleShare(it);
+      const cats = new Set(others.map(x => x.cat).concat([it.cat]));
+      res.when = others.length ? `joins a lot of ${others.length + 1}` : 'starts a new lot (needs 2+)';
+      res.notes.push(cats.size > 1 ? ['bad', 'Mixed categories: lots with no clear theme sell for less.'] : ['good', `Themed ${it.cat} lot. Buyers like a clear theme.`]);
+    } else {
+      res.when = 'gone today';
+      res.notes.push(['meh', 'Frees up shelf space. Not every item deserves your time.']);
+    }
+    return res;
+  }
+
+  function proPick(it, s) {
+    s = s || state;
+    let best = null;
+    for (const ch of CH_ORDER) {
+      const pr = ch === 'posh' || ch === 'mercari' || ch === 'ebay' ? (s.feedback < 3 ? 'move' : 'market') : 'market';
+      const o = evalOption(it, ch, pr, s);
+      if (!o.ok) continue;
+      const score = o.exp - o.time * TIME_VALUE - (ch === 'bundle' ? 0 : 0);
+      if (!best || score > best.score) best = { ch, pricing: pr, score };
+    }
+    return best;
+  }
+
+  /* =========================================================
+     LOTS
+     ========================================================= */
+  function bestValueFor(items) {
+    return items.reduce((sum, it) => {
+      let b = 0;
+      for (const ch of ['ebay', 'posh', 'fb']) {
+        const o = evalOption(it, ch, 'market', priceState);
+        if (o.ok) b = Math.max(b, (o.lo + o.hi) / 2 * (it.cond === 'UNTESTED' ? 1 - DOA_RATE : 1));
+      }
+      return sum + b;
+    }, 0);
   }
   // Lots are priced off what this *kind* of lot usually holds, not what this one holds.
-  // That's what makes a jackpot a jackpot.
-  function expectedValue(cat, grade, size, slots) {
-    let sum = 0, runs = 60;
-    for (let i = 0; i < runs; i++) sum += bestValue(makeItems(cat, grade, size), slots);
+  const priceState = { feedback: 20, up: { ebayMin: 30, fbMin: 45, photo: 1 }, mods: {}, inv: [] };
+  function expectedValue(cat, grade, size) {
+    let sum = 0, runs = 40;
+    for (let i = 0; i < runs; i++) sum += bestValueFor(makeItems(cat, grade, size, 0));
     return sum / runs;
   }
   function makeLot(forceSize) {
-    const grade = weighted([['A', 3], ['B', 5], ['C', 3]]);
+    const grade = weighted([['A', 3], ['B', 5], ['U', 2], ['C', 3]]);
     const size = forceSize || weighted([['S', 4], ['M', 4 + state.day * 0.4], ['L', 1 + state.day * 0.5]]);
     const cat = pick(LOT_CATS);
-    const items = makeItems(cat, grade, size);
+    const items = makeItems(cat, grade, size, state.day);
     const g = GRADES[grade];
-    const base = expectedValue(cat, grade, size, state.slots) * rand(...g.factor);
+    const base = expectedValue(cat, grade, size) * rand(...g.factor) * 0.9;
     const list = round5(base);
     const price = round5(base * (state.mods.discount || 1));
     const msrp = g.manifest ? Math.round(items.reduce((s, it) => s + it.high, 0) * 1.9 * rand(0.85, 1.2) / 10) * 10 : null;
+    // Pallets tell on themselves: tells track the real condition mix, with some noise.
+    const badShare = items.reduce((s, it) => s + (it.cond === 'BROKEN' ? 1 : it.cond === 'UNTESTED' ? 0.5 : 0), 0) / items.length;
+    const nBad = Math.max(0, Math.min(3, Math.round(badShare * 6 + rand(-0.7, 0.7))));
+    const tells = shuffle(BAD_TELLS).slice(0, nBad).map(t => ['bad', t])
+      .concat(shuffle(GOOD_TELLS).slice(0, 3 - nBad).map(t => ['good', t]));
     return {
       no: randi(1000, 9999) + '-' + 'ABCDEFGHJKLMNPQRSTUVWXYZ'[randi(0, 23)],
-      grade, size, cat, items, list, price, msrp,
+      grade, size, cat, items, list, price, msrp, tells: shuffle(tells),
       source: pick(g.sources), units: items.length
     };
   }
+  function shuffle(a) { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
 
   /* =========================================================
      STATE
@@ -510,13 +795,30 @@
   let state;
   function freshState() {
     return {
-      phase: 'intro', day: 1, cash: START_CASH, slots: BASE_SLOTS,
-      mods: {}, nextMods: {}, lots: [], lot: null, listed: [], ledger: null, event: null,
-      stats: { spent: 0, revenue: 0, pallets: 0, jackpots: 0, doa: 0, bestFlip: null, worstLot: null, bestLot: null }
+      phase: 'intro', day: 1, cash: START_CASH, feedback: 0,
+      up: { ebayMin: 30, fbMin: 45, photo: 1 },
+      mods: {}, nextMods: {}, lots: [], lot: null, opened: true, testMin: 0,
+      inv: [], ledger: null, event: null, sheet: null,
+      stats: { spent: 0, revenue: 0, pallets: 0, jackpots: 0, acquired: 0, sold: 0, inad: 0, scams: 0, noShows: 0,
+               onlineSales: 0, localSales: 0, donated: 0, bulkyShipped: 0, cheapListed: 0, bestFlip: null, bestLot: null, worstLot: null }
     };
   }
   function loadBest() { try { return JSON.parse(localStorage.getItem('palletrip.best') || 'null'); } catch (e) { return null; } }
   function saveBest(v) { try { localStorage.setItem('palletrip.best', JSON.stringify(v)); } catch (e) {} }
+
+  const shelf = () => state.inv.filter(i => i.status === 'shelf');
+  const active = () => state.inv.filter(i => i.status === 'active');
+  function planTime(it) {
+    if (!it.plan) return 0;
+    const ch = it.plan.ch;
+    return ch === 'ebay' ? state.up.ebayMin : ch === 'mercari' || ch === 'posh' ? 15 : ch === 'fb' ? state.up.fbMin : 0;
+  }
+  function timeUsed() {
+    const sh = shelf();
+    return state.testMin + sh.reduce((s, it) => s + planTime(it), 0) + (sh.some(it => it.plan && it.plan.ch === 'bundle') ? BUNDLE_MIN : 0);
+  }
+  const timeLeft = () => DAY_MIN - timeUsed();
+  const rentToday = () => BASE_RENT + (shelf().length + active().length > OVERFLOW_AT ? OVERFLOW_RENT : 0);
 
   /* =========================================================
      RENDER: STATUS BAR
@@ -526,29 +828,36 @@
     const logo = bar.querySelector('.logo');
     bar.innerHTML = '';
     bar.appendChild(logo);
-    if (state.phase === 'intro') return;
-    const stats = [
-      ['Day', `${Math.min(state.day, DAYS)}/${DAYS}`, ''],
-      ['Cash', money(state.cash), 'cash' + (bump ? ' bump' : '')],
-      ['eBay slots', String(state.slots), ''],
-      ['Rent', money(RENT) + '/day', '']
-    ];
-    for (const [k, v, cls] of stats) {
-      const d = document.createElement('div');
-      d.className = 'stat ' + cls;
-      d.innerHTML = `<small>${k}</small><b class="${k === 'Cash' && state.cash < 0 ? 'neg' : ''}">${v}</b>`;
-      bar.appendChild(d);
+    if (state.phase !== 'intro') {
+      const held = shelf().length + active().length;
+      const stats = [
+        ['Day', `${Math.min(state.day, DAYS)}/${DAYS}`, '', ''],
+        ['Cash', money(state.cash), 'cash' + (bump ? ' bump' : ''), state.cash < 0 ? 'neg' : ''],
+        ['Feedback', '★ ' + state.feedback, '', ''],
+        ['Stock', String(held), '', held > OVERFLOW_AT ? 'warn' : ''],
+        ['Rent', money(rentToday()) + '/day', '', rentToday() > BASE_RENT ? 'warn' : '']
+      ];
+      for (const [k, v, cls, bcls] of stats) {
+        const d = document.createElement('div');
+        d.className = 'stat ' + cls;
+        d.innerHTML = `<small>${k}</small><b class="${bcls}">${v}</b>`;
+        bar.appendChild(d);
+      }
     }
+    requestAnimationFrame(() => {
+      const h = $('#topbar').offsetHeight;
+      document.documentElement.style.setProperty('--bar-h', h + 'px');
+    });
   }
 
   /* =========================================================
      PHASES
      ========================================================= */
-  function render() {
+  function render(keepScroll) {
     renderBar();
-    const fn = { intro: renderIntro, auction: renderAuction, rip: renderRip, ledger: renderLedger, end: renderEnd }[state.phase];
-    fn();
-    window.scrollTo({ top: 0, behavior: reduced ? 'auto' : 'smooth' });
+    ({ intro: renderIntro, auction: renderAuction, bench: renderBench, ledger: renderLedger, end: renderEnd })[state.phase]();
+    if (!keepScroll) window.scrollTo({ top: 0, behavior: reduced ? 'auto' : 'smooth' });
+    renderSheet();
   }
 
   function boxHTML(top, big) {
@@ -557,6 +866,9 @@
       <div class="stencil">${top}<b>${big}</b></div>
     </div>`;
   }
+  function tipHTML(key) {
+    return `<aside class="tip"><small>From Pallets to Profit</small><p>${TIPS[key]}</p></aside>`;
+  }
 
   function renderIntro() {
     const best = loadBest();
@@ -564,14 +876,15 @@
       <section class="intro">
         <div>
           <h1>Pallet <span>Rip</span></h1>
-          <p class="lede">You have $600, a rented warehouse bay, and ten days. Buy mystery liquidation pallets, cut the tape, and flip what's inside before the rent eats you alive.</p>
+          <p class="lede">You have $600, a storage unit, and ten days. Buy mystery liquidation pallets, sort the haul, and get it sold before the rent eats you alive.</p>
           <ul class="rules">
-            <li><b>Bid</b><span>Three lots a day. The manifest MSRP is a hint, and it lies. Salvage lots don't come with one at all.</span></li>
-            <li><b>Rip</b><span>Every lot is random. Most of it is junk. Some of it is a Dyson.</span></li>
-            <li><b>List</b><span>You can only list ${BASE_SLOTS} things on eBay a day. Everything else hits the dollar table.</span></li>
-            <li><b>Risk</b><span>Untested items die on arrival ${Math.round(DOA_RATE * 100)}% of the time.</span></li>
+            <li><b>Bid</b><span>Three lots a day. Read the curb appeal. The manifest MSRP is retail, not resale.</span></li>
+            <li><b>Sort</b><span>Tap each item and pick where it sells: eBay, Mercari, Poshmark, FB Marketplace, a bundle lot, or donate.</span></li>
+            <li><b>Time</b><span>You get 6 hours a day. Listing, testing and meetups all cost time. Whatever you don't get to waits on the shelf.</span></li>
+            <li><b>Sell</b><span>Online listings sell over the next few days. Marketplace pays cash today, if the buyer shows.</span></li>
+            <li><b>Score</b><span>Cash on day 10. Unsold inventory counts for nothing.</span></li>
           </ul>
-          <div class="row"><button class="btn hot" id="start">Open the warehouse</button></div>
+          <div class="row"><button class="btn hot" id="start">Open the storage unit</button></div>
           ${best ? `<p class="best-line">Your best: ${money(best.cash)} · ${best.rank}</p>` : ''}
         </div>
         <div class="box-stage">${boxHTML('Fragile · This side up', 'Lot #0001')}</div>
@@ -592,19 +905,23 @@
     state.mods = state.nextMods; state.nextMods = {};
     state.phase = 'auction';
     state.lots = [makeLot('S'), makeLot(), makeLot()].sort(() => Math.random() - 0.5);
-    state.lot = null; state.listed = []; state.ledger = null; state.event = null;
+    state.lot = null; state.ledger = null; state.event = null; state.testMin = 0; state.opened = true;
+    for (const it of state.inv) it.plan = null;
     render();
   }
 
   function renderAuction() {
     const m = state.mods;
     const notes = [];
-    if (m.hype) notes.push('Your video is still blowing up: eBay sales +25% today.');
-    if (m.yard) notes.push('Rain in the forecast: the yard sale pays half today.');
-    if (m.fee) notes.push('eBay fees are 16% today.');
+    if (m.hype) notes.push('Your video is still blowing up: online sales are faster and 15% higher today.');
+    if (m.rain) notes.push('Rain today: more Marketplace no-shows.');
+    if (m.reliable) notes.push('Your regular is spreading the word: no no-shows today.');
     if (m.discount) notes.push('Broker discount: 15% off every lot today.');
+    const held = shelf().length, act = active().length;
     const lotsHTML = state.lots.map((l, i) => {
       const can = l.price <= state.cash;
+      const units = l.manifestUnits = l.manifestUnits || (GRADES[l.grade].manifest ? l.units : l.units + randi(-2, 2));
+      const approx = !GRADES[l.grade].manifest;
       return `
       <article class="lot ${can ? '' : 'cant'}">
         <div class="lot-top">
@@ -612,15 +929,20 @@
             <div class="lot-no">LOT #${l.no}</div>
             <div class="lot-src">${l.source}</div>
           </div>
-          <div class="grade" title="Grade ${l.grade}: ${GRADES[l.grade].name}">${l.grade}<small>GRADE</small></div>
+          <div class="grade" title="${GRADES[l.grade].name}">${l.grade}<small>TYPE</small></div>
         </div>
         <dl>
-          <dt>Type</dt><dd>${SIZES[l.size].name}</dd>
-          <dt>Category</dt><dd>${l.cat}</dd>
           <dt>Condition</dt><dd>${GRADES[l.grade].name}</dd>
-          <dt>Units</dt><dd>${l.grade === 'C' ? '~' + (l.units + randi(-2, 2)) : l.units}</dd>
-          <dt>Manifest MSRP</dt>${l.msrp ? `<dd>${money(l.msrp)}</dd>` : `<dd class="unknown">???</dd>`}
+          <dt>Size</dt><dd>${SIZES[l.size].name}</dd>
+          <dt>Category</dt><dd>${l.cat}</dd>
+          <dt>Units</dt><dd>${approx ? '~' : ''}${units}</dd>
+          <dt>Cost per unit</dt><dd>${approx ? '~' : ''}${money(l.price / units)}</dd>
+          <dt>Manifest MSRP</dt>${l.msrp ? `<dd>${money(l.msrp)}</dd>` : `<dd class="unknown">no manifest</dd>`}
         </dl>
+        <div>
+          <div class="tells-h">Curb appeal</div>
+          <div class="tells">${l.tells.map(([k, t]) => `<span class="${k}">${t}</span>`).join('')}</div>
+        </div>
         <div class="barcode" aria-hidden="true"></div>
         <div class="lot-foot">
           <div class="price">${l.price !== l.list ? `<s>${money(l.list)}</s>` : ''}${money(l.price)}</div>
@@ -628,18 +950,23 @@
         </div>
       </article>`;
     }).join('');
+    const tipKey = state.day === 1 ? 'tells' : held > 12 ? 'review' : pick(['tells', 'rule25', 'retail', 'paid', 'curb']);
     $('#stage').innerHTML = `
       <div class="stage-head">
         <div>
-          <div class="eyebrow">Day ${state.day} · Morning auction</div>
+          <div class="eyebrow">Day ${state.day} of ${DAYS} · Morning auction</div>
           <h2>${state.day === DAYS ? 'Last truck of the week.' : pick(['Fresh off the truck.', 'Three lots on the dock.', 'What are we feeling today?', 'The broker is calling.'])}</h2>
-          ${notes.length ? `<p>${notes.join(' ')}</p>` : `<p>Pick one lot, or sit today out. Rent's due either way.</p>`}
+          <p>${notes.length ? notes.join(' ') + ' ' : ''}Buy one lot, or skip the truck and work what you've got.</p>
+          ${held || act ? `<p class="holdings">On the shelf: ${held} · Active listings: ${act}</p>` : ''}
         </div>
       </div>
       <div class="lots">${lotsHTML}</div>
-      <div class="row skip-row"><button class="btn ghost" id="skip">Sit today out (−${money(RENT)} rent)</button></div>`;
+      <div class="row skip-row">
+        <button class="btn ghost" id="skip">${held || act ? 'Skip the truck, work the shelf' : 'Sit today out'}</button>
+      </div>
+      <div style="margin-top:26px">${tipHTML(tipKey)}</div>`;
     document.querySelectorAll('[data-buy]').forEach(b => b.onclick = () => buy(+b.dataset.buy));
-    $('#skip').onclick = () => settle(true);
+    $('#skip').onclick = () => { state.phase = 'bench'; state.lot = null; state.opened = true; render(); };
   }
 
   function buy(i) {
@@ -648,30 +975,106 @@
     state.cash -= l.price;
     state.stats.spent += l.price;
     state.stats.pallets += 1;
+    state.stats.acquired += l.items.length;
     state.lot = l;
-    state.phase = 'rip';
+    state.phase = 'bench';
     state.opened = false;
     renderBar(true);
     render();
   }
 
-  function renderRip() {
+  /* ---------- Workbench ---------- */
+  function renderBench() {
     const l = state.lot;
+    if (l && !state.opened) {
+      $('#stage').innerHTML = `
+        <div class="stage-head">
+          <div>
+            <div class="eyebrow">Day ${state.day} · Lot #${l.no} · Paid ${money(l.price)}</div>
+            <h2>Cut the wrap.</h2>
+            <p>${SIZES[l.size].name} of ${GRADES[l.grade].name.toLowerCase()} from ${l.source}. ${l.msrp ? 'Manifest says ' + money(l.msrp) + ' retail.' : 'No manifest. Nobody knows what\'s in here.'}</p>
+          </div>
+        </div>
+        <div class="box-stage">${boxHTML(l.source, '#' + l.no)}</div>`;
+      const box = $('#box');
+      const go = () => openBox(box);
+      box.onclick = go;
+      box.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } };
+      box.focus({ preventScroll: true });
+      return;
+    }
+    const fresh = l ? shelf().filter(it => l.items.includes(it)) : [];
+    const old = shelf().filter(it => !fresh.includes(it));
+    const acts = active();
+    const jp = fresh.some(i => i.tier === 'jackpot');
+    const head = l
+      ? (state.justOpened ? (jp ? 'Oh. OH.' : pick(['Here\'s the haul.', 'Let\'s see what we got.', 'Could be worse.', 'Smells like a warehouse.'])) : 'Sort the pile.')
+      : 'Work the shelf.';
     $('#stage').innerHTML = `
       <div class="stage-head">
         <div>
-          <div class="eyebrow">Day ${state.day} · Lot #${l.no} · Paid ${money(l.price)}</div>
-          <h2 id="rip-h">${state.opened ? 'Here\'s the haul.' : 'Cut the tape.'}</h2>
-          <p id="rip-p">${state.opened ? 'Tap items to list them on eBay. Everything else goes on the dollar table.' : `${SIZES[l.size].name} from ${l.source}. ${l.msrp ? 'Manifest says ' + money(l.msrp) + ' retail.' : 'No manifest. Nobody knows what\'s in here.'}`}</p>
+          <div class="eyebrow">Day ${state.day} · ${l ? 'Lot #' + l.no : 'No truck today'}</div>
+          <h2>${head}</h2>
+          <p>Tap an item to choose where it sells. Fast cash first. Anything you don't sort today waits on the shelf.</p>
         </div>
       </div>
-      <div id="rip-body">${state.opened ? '' : `<div class="box-stage">${boxHTML(l.source, '#' + l.no)}</div>`}</div>`;
-    if (state.opened) { renderHaul(false); return; }
-    const box = $('#box');
-    const go = () => openBox(box);
-    box.onclick = go;
-    box.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } };
-    box.focus({ preventScroll: true });
+      <div class="clock" id="clock"></div>
+      ${fresh.length ? `<section class="bench-section"><h3>Fresh off the pallet <small>${fresh.length} items</small></h3><div class="tags" id="tags-fresh"></div></section>` : ''}
+      ${old.length ? `<section class="bench-section"><h3>On the shelf <small>${old.length} waiting since earlier</small></h3><div class="tags" id="tags-old"></div></section>` : ''}
+      ${!fresh.length && !old.length ? `<section class="bench-section"><p class="note">Nothing to sort. ${acts.length ? 'Your active listings will keep selling when you close up.' : 'Buy a lot tomorrow.'}</p></section>` : ''}
+      ${acts.length ? `<section class="bench-section"><details class="active-list"><summary>Active listings · ${acts.length}<span>${money(acts.reduce((s, it) => s + onlinePrice(it, it.listed.ch, it.listed.pricing, 0.5), 0))} listed</span></summary><ul>${acts.map(it => `
+        <li><span class="dot" style="background:${CH[it.listed.ch].color}"></span><span>${it.icon} ${it.name}</span><span class="where">${CH[it.listed.ch].name} · day ${state.day - it.listed.day + 1}</span></li>`).join('')}</ul></details></section>` : ''}
+      <div style="margin-top:26px">${tipHTML(state.justOpened ? 'sort' : pick(['speed', 'bundle', 'golf', 'test', 'open']))}</div>`;
+    const draw = (el, items) => {
+      if (!el) return;
+      el.innerHTML = items.map((it, idx) => tagHTML(it, state.justOpened && fresh.includes(it) ? idx : -1)).join('');
+    };
+    draw($('#tags-fresh'), fresh);
+    draw($('#tags-old'), old);
+    state.justOpened = false;
+    document.querySelectorAll('.tag').forEach(t => t.onclick = () => openSheet(+t.dataset.id));
+    updateClock();
+  }
+
+  function tagHTML(it, animIdx) {
+    const [a, b] = range(it);
+    const plan = it.plan;
+    const chip = plan
+      ? `<span class="chip ${plan.ch}">${CH[plan.ch].name}${CH[plan.ch].kind === 'online' ? ' · ' + PRICING[plan.pricing].label : ''}</span>`
+      : `<span class="chip">Tap to sort</span>`;
+    return `<button class="tag ${it.tier === 'jackpot' ? 'jackpot' : ''} ${plan ? 'planned' : ''}" data-id="${it.id}"
+        style="${animIdx >= 0 ? `animation-delay:${animIdx * 80}ms` : 'animation:none'}">
+      <span class="ico" aria-hidden="true">${it.icon}</span>
+      <span class="nm">${it.name}</span>
+      <span class="meta"><span class="cond ${it.cond}">${COND[it.cond].label}</span><span class="size">${SIZE_LABEL[it.size]}</span></span>
+      <span class="vals">Comps <b>${money(a)}–${money(b)}</b>${it.cond === 'UNTESTED' ? '*' : ''}</span>
+      ${chip}
+    </button>`;
+  }
+
+  function updateClock() {
+    const el = $('#clock');
+    if (!el) return;
+    const used = timeUsed(), left = DAY_MIN - used;
+    const blocks = Array.from({ length: 12 }, (_, i) => {
+      const fill = (used - i * 30) / 30;
+      return `<i class="${fill >= 1 ? 'used' : fill > 0 ? 'part' : ''}"></i>`;
+    }).join('');
+    const sh = shelf();
+    const counts = {};
+    sh.forEach(it => { if (it.plan) counts[it.plan.ch] = (counts[it.plan.ch] || 0) + 1; });
+    const summary = Object.keys(counts).map(k => `${counts[k]} ${CH[k].name}`).join(' · ') || 'Nothing sorted yet';
+    el.innerHTML = `
+      <div style="display:grid;gap:6px;min-width:0;flex:1 1 260px">
+        <div class="meter" aria-hidden="true">${blocks}</div>
+        <div class="left"><b>${hm(left)}</b> left today<span class="summary"> · ${summary}</span></div>
+      </div>
+      <div class="row">
+        ${sh.length ? `<button class="btn ghost small" id="auto">Sort it for me</button>` : ''}
+        <button class="btn hot small" id="close">Close up shop</button>
+      </div>`;
+    if ($('#auto')) $('#auto').onclick = autoSort;
+    $('#close').onclick = settle;
   }
 
   async function openBox(box) {
@@ -681,184 +1084,316 @@
     box.classList.add('open');
     await wait(520);
     state.opened = true;
-    const jp = state.lot.items.filter(i => i.tier === 'jackpot').length;
-    state.stats.jackpots += jp;
-    $('#rip-h').textContent = jp ? 'Oh. OH.' : pick(['Here\'s the haul.', 'Let\'s see what we got.', 'Could be worse.', 'Smells like a warehouse.']);
-    $('#rip-p').textContent = 'Tap items to list them on eBay. Everything else goes on the dollar table.';
-    renderHaul(true);
+    state.justOpened = true;
+    state.inv.push(...state.lot.items);
+    state.stats.jackpots += state.lot.items.filter(i => i.tier === 'jackpot').length;
+    renderBar();
+    render(true);
   }
 
-  function projection() {
-    const fee = state.mods.fee || EBAY_FEE, hype = state.mods.hype || 1, ym = state.mods.yard || 1;
-    let lo = 0, hi = 0;
-    for (const it of state.lot.items) {
-      if (state.listed.includes(it.id)) {
-        const [a, b] = valRange(it);
-        const worst = it.cond === 'UNTESTED' ? it.low * 0.15 : a;
-        lo += worst * hype * (1 - fee) - EBAY_ORDER_FEE - PACKING;
-        hi += b * hype * (1 - fee) - EBAY_ORDER_FEE - PACKING;
-      } else {
-        const y = yardValue(it, ym); lo += y; hi += y;
-      }
+  function autoSort() {
+    const items = shelf().filter(it => !it.plan);
+    // Test the untested ones worth testing first.
+    for (const it of items) {
+      if (it.cond === 'UNTESTED' && it.high * 0.75 > 40 && timeLeft() >= TEST_MIN + 15) testItem(it, true);
     }
-    return [lo, hi];
+    const ranked = items.map(it => ({ it, p: proPick(it) })).sort((a, b) => b.p.score - a.p.score);
+    for (const { it, p } of ranked) {
+      const need = p.ch === 'bundle' ? (shelf().some(x => x.plan && x.plan.ch === 'bundle') ? 0 : BUNDLE_MIN)
+        : p.ch === 'ebay' ? state.up.ebayMin : p.ch === 'fb' ? state.up.fbMin : p.ch === 'donate' ? 0 : 15;
+      if (need <= timeLeft()) it.plan = { ch: p.ch, pricing: p.pricing };
+    }
+    // A bundle of one isn't a bundle.
+    const bundled = shelf().filter(x => x.plan && x.plan.ch === 'bundle');
+    if (bundled.length === 1) bundled[0].plan = { ch: 'donate', pricing: 'market' };
+    renderBench();
   }
 
-  function renderHaul(animate) {
-    const l = state.lot;
-    const ym = state.mods.yard || 1;
-    const sorted = l.items.slice();
-    const tags = sorted.map((it, idx) => {
-      const [a, b] = valRange(it);
-      const on = state.listed.includes(it.id);
-      return `<button class="tag ${it.tier === 'jackpot' ? 'jackpot' : ''} ${on ? 'listed' : ''}" data-id="${it.id}" aria-pressed="${on}"
-          style="${animate ? `animation-delay:${idx * 90}ms` : 'animation:none'}">
-        <span class="listed-sticker">Listed on eBay</span>
-        <span class="ico" aria-hidden="true">${it.icon}</span>
-        <span class="nm">${it.name}</span>
-        <span class="cond ${it.cond}">${COND[it.cond].label}</span>
-        <span class="vals">
-          <span>eBay <b>${money(a)}–${money(b)}</b>${it.cond === 'UNTESTED' ? '*' : ''}</span>
-          <span>Yard <b>${money(yardValue(it, ym))}</b></span>
-        </span>
+  function testItem(it, silent) {
+    if (it.cond !== 'UNTESTED' || timeLeft() < TEST_MIN) return;
+    state.testMin += TEST_MIN;
+    it.cond = it.dead ? 'BROKEN' : 'OPEN';
+    it.testResult = it.dead ? 'bad' : 'good';
+    if (!silent) state.sheet.flash = it.testResult;
+  }
+
+  /* ---------- The sheet: where does this sell? ---------- */
+  function openSheet(id) {
+    const it = state.inv.find(x => x.id === id);
+    state.sheet = { id, pricing: (it.plan && it.plan.pricing) || (state.feedback < 3 ? 'move' : 'market') };
+    renderSheet();
+  }
+  function closeSheet() {
+    state.sheet = null;
+    renderSheet();
+    if (state.phase === 'bench') {
+      const y = window.scrollY;
+      renderBench();
+      window.scrollTo(0, y);
+    }
+  }
+  function renderSheet() {
+    const root = $('#sheet-root');
+    if (!state || !state.sheet || state.phase !== 'bench') { root.innerHTML = ''; document.body.classList.remove('sheet-open'); return; }
+    const it = state.inv.find(x => x.id === state.sheet.id);
+    const pr = state.sheet.pricing;
+    const [a, b] = range(it);
+    const pp = proPick(it);
+    const left = timeLeft() + planTime(it) + (it.plan && it.plan.ch === 'bundle' && shelf().filter(x => x.plan && x.plan.ch === 'bundle').length === 1 ? BUNDLE_MIN : 0);
+    const opts = CH_ORDER.map(ch => {
+      const o = evalOption(it, ch, CH[ch].kind === 'online' ? pr : 'market');
+      const fits = o.time <= left;
+      const chosen = it.plan && it.plan.ch === ch;
+      const dis = !o.ok || (!fits && !chosen);
+      const net = CH[ch].kind === 'donate' ? '$0'
+        : CH[ch].kind === 'bundle' ? `+${money(Math.max(0, o.exp))}`
+        : `${money(o.lo)}–${money(o.hi)}`;
+      const netCls = o.hi < 0 ? 'neg' : '';
+      const detail = !o.ok ? o.why
+        : `${CH[ch].kind === 'local' ? 'Cash' : CH[ch].kind === 'online' ? 'Net after fees' + (CH[ch].ships ? ' & shipping' : '') : CH[ch].kind === 'bundle' ? 'Adds to the lot' : 'No money'} · ${o.time ? hm(o.time) : 'no time'} · ${o.when}${!fits && !chosen ? ' · not enough time today' : ''}`;
+      return `<button class="opt" data-ch="${ch}" aria-pressed="${chosen}" ${dis ? 'disabled' : ''}>
+        <span class="stripe" style="background:${CH[ch].color}"></span>
+        <span class="t">${CH[ch].name}${pp && pp.ch === ch ? ' <span class="pro">Pro pick</span>' : ''}${chosen ? ' <span class="picked">Chosen</span>' : ''}</span>
+        <span class="n ${netCls}">${o.ok ? net : ''}</span>
+        <span class="d">${detail}</span>
+        ${o.ok && o.notes.length ? `<span class="w">${o.notes.map(([k, t]) => `<span class="${k}">${t}</span>`).join('')}</span>` : ''}
       </button>`;
     }).join('');
-    $('#rip-body').innerHTML = `
-      <div class="haul-bar">
-        <div class="row">
-          <div class="slots" id="slots" aria-label="eBay listing slots"></div>
-          <div class="proj" id="proj"></div>
+    const flash = state.sheet.flash;
+    root.innerHTML = `
+      <div class="scrim" id="scrim"></div>
+      <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
+        <div class="sheet-head">
+          <span class="ico" aria-hidden="true">${it.icon}</span>
+          <div>
+            <h3 id="sheet-title">${it.name}</h3>
+            <div class="sub"><span class="cond ${it.cond}">${COND[it.cond].label}</span><span>${SIZE_LABEL[it.size]} · ships for ${money(shipCost(it))}</span><span>${it.cat}</span></div>
+          </div>
+          <button class="x" id="x" aria-label="Close">×</button>
         </div>
-        <div class="row">
-          <button class="btn ghost" id="auto">Pick for me</button>
-          <button class="btn hot" id="ship">Ship it</button>
+        <div class="comps">
+          <div><small>Sold comps</small>${money(a)}–${money(b)}</div>
+          <div><small>Local price</small>${money(fbRange(it)[0])}–${money(fbRange(it)[1])}</div>
+          <div><small>Time left</small>${hm(timeLeft())}</div>
         </div>
-      </div>
-      <div class="tags" id="tags">${tags}</div>
-      ${l.items.some(i => i.cond === 'UNTESTED') ? `<p class="note">* Untested: price shown if it works. ${Math.round(DOA_RATE * 100)}% arrive dead and sell for parts.</p>` : ''}`;
-    document.querySelectorAll('.tag').forEach(t => t.onclick = () => toggle(+t.dataset.id));
-    $('#auto').onclick = autoPick;
-    $('#ship').onclick = () => settle(false);
-    updateHaul();
-  }
-
-  function toggle(id) {
-    const i = state.listed.indexOf(id);
-    if (i >= 0) state.listed.splice(i, 1);
-    else if (state.listed.length < state.slots) state.listed.push(id);
-    else { state.listed.shift(); state.listed.push(id); }
-    updateHaul();
-  }
-
-  function autoPick() {
-    const ranked = state.lot.items
-      .map(it => ({ id: it.id, g: ebayExpected(it, state.mods.fee || EBAY_FEE) - yardValue(it, state.mods.yard || 1) }))
-      .filter(x => x.g > 0).sort((a, b) => b.g - a.g);
-    state.listed = ranked.slice(0, state.slots).map(x => x.id);
-    updateHaul();
-  }
-
-  function updateHaul() {
-    document.querySelectorAll('.tag').forEach(t => {
-      const on = state.listed.includes(+t.dataset.id);
-      t.classList.toggle('listed', on);
-      t.setAttribute('aria-pressed', on);
+        ${flash ? `<div class="test-result ${flash}">${flash === 'good' ? 'Works. Ran it through a full cycle. It\'s open box now.' : 'Dead. Glad you checked. It\'s a parts unit now.'}</div>` : ''}
+        ${it.cond === 'UNTESTED' ? `<div class="test-row"><p><b>Untested.</b> ${Math.round(DOA_RATE * 100)}% of these are dead. Testing takes ${TEST_MIN} minutes and kills the return risk.</p><button class="btn small" id="test" ${timeLeft() < TEST_MIN ? 'disabled' : ''}>Test it · ${TEST_MIN}m</button></div>` : ''}
+        <div class="seg-h">Online pricing</div>
+        <div class="seg" role="group" aria-label="Online pricing">
+          ${Object.keys(PRICING).map(k => `<button data-pr="${k}" aria-pressed="${k === pr}">${PRICING[k].label}<small>${PRICING[k].hint}</small></button>`).join('')}
+        </div>
+        <div class="opts">${opts}</div>
+        <div class="sheet-foot">
+          ${it.plan ? `<button class="btn ghost small" id="unplan">Leave it on the shelf</button>` : '<span></span>'}
+          <button class="btn small" id="done">Done</button>
+        </div>
+      </div>`;
+    document.body.classList.add('sheet-open');
+    state.sheet.flash = null;
+    $('#scrim').onclick = closeSheet;
+    $('#x').onclick = closeSheet;
+    $('#done').onclick = closeSheet;
+    if ($('#unplan')) $('#unplan').onclick = () => { it.plan = null; closeSheet(); };
+    if ($('#test')) $('#test').onclick = () => { testItem(it); renderSheet(); };
+    root.querySelectorAll('[data-pr]').forEach(btn => btn.onclick = () => {
+      state.sheet.pricing = btn.dataset.pr;
+      if (it.plan && CH[it.plan.ch].kind === 'online') it.plan.pricing = btn.dataset.pr;
+      renderSheet();
     });
-    $('#slots').innerHTML = Array.from({ length: state.slots }, (_, i) => `<span class="slot ${i < state.listed.length ? 'on' : ''}"></span>`).join('');
-    const [lo, hi] = projection();
-    $('#proj').innerHTML = `${state.listed.length}/${state.slots} listed · Projected <b>${money(lo)}–${money(hi)}</b>`;
+    root.querySelectorAll('.opt').forEach(btn => btn.onclick = () => {
+      if (btn.disabled) return;
+      const ch = btn.dataset.ch;
+      it.plan = { ch, pricing: CH[ch].kind === 'online' ? state.sheet.pricing : 'market' };
+      closeSheet();
+    });
   }
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && state && state.sheet) closeSheet(); });
 
   /* =========================================================
-     SETTLE THE DAY
+     CLOSE UP SHOP
      ========================================================= */
-  function settle(skipped) {
-    const fee = state.mods.fee || EBAY_FEE, hype = state.mods.hype || 1, ym = state.mods.yard || 1;
-    const lines = [];
-    let net = 0;
-    if (!skipped) {
-      const l = state.lot;
-      lines.push({ t: `Lot #${l.no}, ${l.source}`, v: -l.price });
-      net -= l.price;
-      let fees = 0, yard = 0, yardN = 0, gross = 0;
-      for (const it of l.items) {
-        if (state.listed.includes(it.id)) {
-          const [a, b] = valRange(it);
-          let price, dead = false;
-          if (it.cond === 'UNTESTED' && Math.random() < DOA_RATE) { price = it.low * rand(0.1, 0.2); dead = true; state.stats.doa += 1; }
-          else price = rand(a, b) * hype;
-          price = Math.max(1, Math.round(price * 100) / 100);
-          const f = price * fee + EBAY_ORDER_FEE + PACKING;
-          fees += f; gross += price;
-          lines.push({ t: (dead ? 'DOA, sold for parts: ' : 'eBay: ') + it.name, v: price, cents: true, cls: dead ? 'neg-name' : '' });
-          const best = state.stats.bestFlip;
-          if (!dead && (!best || price > best.price)) state.stats.bestFlip = { name: it.name, price };
-        } else {
-          yard += yardValue(it, ym); yardN += 1;
-        }
-      }
-      if (fees) lines.push({ t: `eBay fees ${Math.round(fee * 10000) / 100}% + $0.30, packing`, v: -fees, cents: true, dim: true });
-      if (yardN) lines.push({ t: `Dollar table (${yardN} item${yardN > 1 ? 's' : ''})`, v: yard });
-      const take = gross - fees + yard;
-      net += take;
-      state.stats.revenue += take;
-      const lotNet = take - l.price;
-      if (!state.stats.bestLot || lotNet > state.stats.bestLot.net) state.stats.bestLot = { name: l.source, net: lotNet };
-      if (!state.stats.worstLot || lotNet < state.stats.worstLot.net) state.stats.worstLot = { name: l.source, net: lotNet };
-    }
-    lines.push({ t: 'Warehouse rent', v: -RENT });
-    net -= RENT;
+  function sold(it, price) {
+    it.status = 'sold';
+    state.stats.sold += it.members ? it.members.length : 1;
+    state.stats.revenue += price;
+    const best = state.stats.bestFlip;
+    if (!best || price > best.price) state.stats.bestFlip = { name: it.name, price };
+  }
 
-    // Overnight event
+  function settle() {
+    const groups = { buy: [], local: [], online: [], costs: [] };
+    const flags = {};
+    let net = 0;
+    const add = (g, t, v, cls) => { groups[g].push({ t, v, cls }); net += v; };
+
+    const l = state.lot;
+    if (l) add('buy', `Lot #${l.no}, ${l.source}`, -l.price);
+
+    // 1) Bundles become one eBay lot listing.
+    const bItems = shelf().filter(it => it.plan && it.plan.ch === 'bundle');
+    if (bItems.length === 1) bItems[0].plan = null;
+    if (bItems.length >= 2) {
+      const cats = new Set(bItems.map(i => i.cat));
+      const theme = cats.size === 1 ? [...cats][0] : null;
+      const value = bItems.reduce((s, i) => s + midv(i) * 0.6, 0) * (theme ? 1 : 0.75);
+      const units = bItems.reduce((s, i) => s + ({ S: 1, M: 3, L: 8 })[i.size], 0);
+      bItems.forEach(i => { i.status = 'gone'; i.plan = null; });
+      state.inv.push({
+        id: ++uid, icon: '📦', name: `${theme || 'Mixed'} lot, ${bItems.length} items`, cat: theme || 'Mixed', tier: 'common',
+        low: value * 0.85, high: value * 1.15, size: 'M', ship: Math.min(45, 6 + units * 3), cond: 'NEW', dead: false,
+        status: 'active', listed: { ch: 'ebay', pricing: 'market', day: state.day }, members: bItems.map(i => i.name)
+      });
+    }
+
+    // 2) Everything else that was sorted.
+    for (const it of shelf().filter(x => x.plan)) {
+      const { ch, pricing } = it.plan;
+      it.plan = null;
+      if (ch === 'donate') { it.status = 'gone'; state.stats.donated++; continue; }
+      if (ch === 'fb') {
+        const ns = state.mods.reliable ? 0 : state.mods.rain ? NO_SHOW_RAIN : NO_SHOW;
+        if (Math.random() < ns) { add('local', `No-show: ${it.name}`, 0, 'zero'); state.stats.noShows++; flags.noShow = true; continue; }
+        if (it.cond === 'UNTESTED' && it.dead) {
+          it.cond = 'BROKEN'; it.testResult = 'bad';
+          add('local', `Buyer tested the ${it.name}. Dead. They walked.`, 0, 'zero'); flags.walked = true; continue;
+        }
+        if (it.cond === 'UNTESTED') it.cond = 'OPEN';
+        const price = Math.max(1, Math.round(rand(...fbRange(it))));
+        add('local', `Marketplace cash: ${it.name}`, price);
+        sold(it, price); state.stats.localSales++;
+        // Bring related items to the meetup.
+        if (Math.random() < UPSELL) {
+          const extra = shelf().filter(x => !x.plan && x.cond !== 'BROKEN' && midv(x) > 8);
+          if (extra.length) {
+            const x = pick(extra);
+            if (x.cond === 'UNTESTED') x.cond = x.dead ? 'BROKEN' : 'OPEN';
+            const p2 = Math.max(1, Math.round(rand(...fbRange(x))));
+            add('local', `Showed them the ${x.name} too. Sold.`, p2);
+            sold(x, p2); state.stats.localSales++; flags.upsell = true;
+          }
+        }
+        continue;
+      }
+      // online
+      it.status = 'active';
+      it.listed = { ch, pricing, day: state.day };
+      if (CH[ch].ships && it.size === 'L') flags.bulky = true;
+      const o = evalOption(it, ch, pricing);
+      if (o.hi < 10 && it.cond !== 'BROKEN') { state.stats.cheapListed++; flags.cheap = true; }
+    }
+
+    // 3) Online sales roll for every active listing.
+    let fees = 0, ship = 0;
+    for (const it of active()) {
+      const { ch, pricing } = it.listed;
+      if (Math.random() >= sellChance(it, ch, pricing)) continue;
+      const c = CH[ch];
+      let price = onlinePrice(it, ch, pricing, Math.random()) * (state.mods.hype ? 1.15 : 1);
+      price = Math.max(1, Math.round(price));
+      const sc = c.ships ? shipCost(it) : 0;
+      if (it.cond === 'UNTESTED' && it.dead) {
+        add('online', `INAD return: ${it.name} arrived dead`, -(sc * 2 || 8), 'neg');
+        it.cond = 'BROKEN'; it.status = 'shelf'; it.listed = null; state.stats.inad++; flags.inad = true;
+        continue;
+      }
+      if (state.feedback < SCAM_FEEDBACK && price > SCAM_PRICE && Math.random() < SCAM_RATE) {
+        add('online', `Scammed: "${it.name} never arrived." Refunded.`, -sc, 'neg');
+        it.status = 'gone'; state.stats.scams++; flags.scam = true;
+        continue;
+      }
+      if (it.cond === 'UNTESTED') it.cond = 'OPEN';
+      add('online', `${c.name}: ${it.name}`, price);
+      fees += price * c.fee + c.flat;
+      ship += sc;
+      sold(it, price);
+      state.feedback += 1;
+      state.stats.onlineSales++;
+    }
+    if (fees) add('online', 'Platform fees', -fees, 'dim');
+    if (ship) add('online', 'Shipping labels', -ship, 'dim');
+
+    // 4) Rent
+    const r = rentToday();
+    add('costs', r > BASE_RENT ? 'Storage unit + overflow space' : 'Storage unit rent', -r);
+
+    // 5) Overnight
     let event = null;
     if (state.day < DAYS && Math.random() < 0.55) {
       const pool = EVENTS.filter(e => !e.ok || e.ok(state));
-      event = weighted(pool.map(e => [e, e.w]));
-      if (event.apply) {
-        const tmp = { mods: state.nextMods, slots: state.slots };
-        event.apply(tmp);
-        state.nextMods = tmp.mods; state.slots = tmp.slots;
+      const ev = weighted(pool.map(e => [e, e.w]));
+      let text = ev.text;
+      if (ev.apply) ev.apply(state);
+      if (ev.curb) {
+        const free = makeItem(pick(['Home & Kitchen', 'Toys & Sports', 'Tools']), 'A', state.day + 1);
+        free.cond = 'OPEN'; free.tier = free.tier === 'jackpot' ? 'good' : free.tier;
+        state.inv.push(free); state.stats.acquired++;
+        text = text.replace('{item}', free.name.toLowerCase());
       }
-      if (event.cash) { lines.push({ t: event.cash > 0 ? 'Lucky break' : 'Bad break', v: event.cash }); net += event.cash; }
+      if (ev.cash) add('costs', ev.cash > 0 ? 'Lucky break' : 'Overnight', ev.cash);
+      event = text;
     }
 
-    // Pallet cost was already deducted at purchase; add back everything else.
-    state.cash += net + (skipped ? 0 : state.lot.price);
-    state.ledger = { lines, net, skipped };
+    // Lot P&L for the end screen
+    if (l) {
+      const lotTake = net + l.price + r; // rough: today's take attributed to the newest lot
+      const ln = lotTake - l.price;
+      if (!state.stats.bestLot || ln > state.stats.bestLot.net) state.stats.bestLot = { name: l.source, net: ln };
+      if (!state.stats.worstLot || ln < state.stats.worstLot.net) state.stats.worstLot = { name: l.source, net: ln };
+    }
+
+    // Pallet cost was already deducted at purchase.
+    state.cash += net + (l ? l.price : 0);
+    state.ledger = { groups, net, flags };
     state.event = event;
     state.phase = 'ledger';
-    renderBar(true);
+    state.sheet = null;
     render();
     renderBar(true);
   }
 
+  function lessonKey(f) {
+    if (f.inad || f.walked) return 'test';
+    if (f.scam) return 'feedback';
+    if (f.noShow) return 'meetup';
+    if (f.upsell) return 'see';
+    if (f.bulky) return 'golf';
+    if (f.cheap) return 'bundle';
+    return pick(['paid', 'speed', 'review', 'retail']);
+  }
+
   function renderLedger() {
-    const { lines, net, skipped } = state.ledger;
-    const body = lines.map((ln, i) => {
-      const cls = ln.dim ? 'dim' : (ln.v < 0 ? 'neg' : 'pos');
-      const v = ln.v < 0 ? money(ln.v, ln.cents) : money(ln.v, ln.cents);
-      return `<div class="ln ${cls}" style="animation-delay:${i * 70}ms"><span>${ln.t}</span><span>${v}</span></div>`;
-    }).join('');
+    const { groups, net, flags } = state.ledger;
+    const titles = { buy: 'Bought', local: 'Marketplace meetups', online: 'Online sales', costs: 'Costs' };
+    let i = 0;
+    const body = Object.keys(groups).filter(k => groups[k].length).map(k =>
+      `<div class="grp">${titles[k]}</div>` + groups[k].map(ln => {
+        const cls = ln.cls === 'dim' ? 'dim' : ln.cls === 'zero' ? 'zero' : (ln.v < 0 ? 'neg' : 'pos');
+        return `<div class="ln ${cls}" style="animation-delay:${(i++) * 60}ms"><span>${ln.t}</span><span>${ln.v === 0 ? '$0' : money(ln.v)}</span></div>`;
+      }).join('')).join('');
+    const quiet = !groups.local.length && !groups.online.length;
     const busted = state.cash < 0;
     const last = state.day >= DAYS;
-    const stampTxt = skipped ? 'CLOSED' : (net >= 0 ? 'PROFIT' : 'LOSS');
+    const acts = active().length, sh = shelf().length;
     $('#stage').innerHTML = `
       <div class="ledger-wrap">
         <div class="receipt">
-          <h3>WAREHOUSE BAY 4</h3>
+          <h3>STORAGE UNIT 114</h3>
           <div class="sub">Day ${state.day} of ${DAYS}</div>
-          <div class="stamp ${net >= 0 ? 'pos' : 'neg'}">${stampTxt}</div>
           ${body}
+          ${quiet ? `<div class="ln zero"><span>No sales today</span><span>$0</span></div>` : ''}
           <div class="rule"></div>
           <div class="ln big ${net >= 0 ? 'pos' : 'neg'}"><span>Day net</span><span>${signed(net)}</span></div>
           <div class="ln big"><span>Cash on hand</span><span>${money(state.cash)}</span></div>
+          <div class="ln dim"><span>Still listed / on the shelf</span><span>${acts} / ${sh}</span></div>
+          <div class="stamp ${net >= 0 ? 'pos' : 'neg'}">${net >= 0 ? 'PROFIT' : 'LOSS'}</div>
         </div>
         <div class="side">
           <div>
             <div class="eyebrow">${busted ? 'Game over' : last ? 'That\'s the week' : 'End of day ' + state.day}</div>
-            <h2 style="font-size:clamp(1.7rem,4.5vw,2.4rem);margin-top:6px">${headline(net, skipped, busted)}</h2>
+            <h2 style="font-size:clamp(1.7rem,4.5vw,2.4rem);margin-top:6px">${headline(net, busted, quiet)}</h2>
           </div>
-          ${state.event ? `<div class="sticky-note"><small>Overnight</small>${state.event.text}</div>` : ''}
+          ${state.event ? `<div class="sticky-note"><small>Overnight</small>${state.event}</div>` : ''}
+          ${tipHTML(lessonKey(flags))}
           <button class="btn hot" id="next">${busted || last ? 'See how you did' : 'Next morning'}</button>
         </div>
       </div>`;
@@ -868,13 +1403,13 @@
     };
   }
 
-  function headline(net, skipped, busted) {
-    if (busted) return 'The landlord changed the locks.';
-    if (skipped) return 'A quiet day. The rent didn\'t take one off.';
+  function headline(net, busted, quiet) {
+    if (busted) return 'The landlord cut the lock.';
+    if (quiet) return 'Inventory isn\'t money yet.';
     if (net > 400) return 'You should probably quit your day job.';
     if (net > 150) return 'Now that\'s a flip.';
     if (net > 0) return 'Green is green.';
-    if (net > -100) return 'Paid to haul away someone\'s returns.';
+    if (net > -150) return 'Cash is tied up in cardboard.';
     return 'That pallet was a crime scene.';
   }
 
@@ -886,15 +1421,26 @@
     for (const [min, name] of RANKS) if (cash >= min) r = name;
     return r;
   }
+  function endLesson(s, deadValue) {
+    if (s.inad + s.scams >= 2) return ['test', 'Returns and scams ate your margin.'];
+    if (deadValue > state.cash * 0.5 && deadValue > 200) return ['paid', `You finished holding ${money(deadValue)} in unsold comps.`];
+    if (s.cheapListed >= 3) return ['bundle', 'You listed a lot of under-$10 stuff one at a time.'];
+    if (s.noShows >= 3) return ['meetup', `${s.noShows} no-shows this week.`];
+    return ['review', 'Every pallet teaches you what to buy next.'];
+  }
 
   function renderEnd() {
     const s = state.stats;
     const busted = state.cash < 0;
     const rank = busted ? 'Repo\'d' : rankFor(state.cash);
+    const leftover = state.inv.filter(i => i.status === 'shelf' || i.status === 'active');
+    const deadValue = leftover.reduce((t, i) => t + midv(i), 0);
+    const str = s.acquired ? Math.round(s.sold / s.acquired * 100) : 0;
     const best = loadBest();
     const isBest = !busted && (!best || state.cash > best.cash);
     if (isBest) saveBest({ cash: Math.round(state.cash), rank });
-    const brag = `Pallet Rip: ${busted ? 'went broke on day ' + state.day : DAYS + ' days'}, $${START_CASH} → ${money(state.cash)}. ${rank}.` +
+    const [lk, lead] = endLesson(s, deadValue);
+    const brag = `Pallet Rip: ${busted ? 'went broke on day ' + state.day : DAYS + ' days'}, $${START_CASH} → ${money(state.cash)}. ${rank}. ${str}% sell-through, ★${state.feedback} feedback.` +
       (s.bestFlip ? ` Best flip: ${s.bestFlip.name} for ${money(s.bestFlip.price)}.` : '') + `\nrobertsdkyle.com/pallet`;
     $('#stage').innerHTML = `
       <section class="end">
@@ -905,14 +1451,17 @@
         <div class="end-stats">
           <div><small>Profit</small><b>${signed(state.cash - START_CASH)}</b></div>
           <div><small>Pallets ripped</small><b>${s.pallets}</b></div>
+          <div><small>Sell-through</small><b>${str}% (${s.sold}/${s.acquired})</b></div>
+          <div><small>Feedback</small><b>★ ${state.feedback}</b></div>
+          <div><small>Online / local sales</small><b>${s.onlineSales} / ${s.localSales}</b></div>
+          <div><small>Returns + scams</small><b>${s.inad} + ${s.scams}</b></div>
           <div><small>Jackpots found</small><b>${s.jackpots}</b></div>
-          <div><small>Dead on arrival</small><b>${s.doa}</b></div>
+          <div><small>Unsold at the end</small><b>${leftover.length} items, ~${money(deadValue)}</b></div>
           <div><small>Best flip</small><b>${s.bestFlip ? `${s.bestFlip.name}, ${money(s.bestFlip.price)}` : 'Nothing'}</b></div>
-          <div><small>Best lot</small><b>${s.bestLot ? `${s.bestLot.name}, ${signed(s.bestLot.net)}` : 'None'}</b></div>
-          <div><small>Worst lot</small><b>${s.worstLot ? `${s.worstLot.name}, ${signed(s.worstLot.net)}` : 'None'}</b></div>
         </div>
+        <div><p style="margin:0 0 10px;font-weight:700">${lead}</p>${tipHTML(lk)}</div>
         <div class="row">
-          <button class="btn hot" id="again">Rent the bay again</button>
+          <button class="btn hot" id="again">Rent the unit again</button>
           <button class="btn ghost" id="brag">Copy my score</button>
         </div>
         <pre class="copy-out" id="copy-out"></pre>
@@ -941,14 +1490,16 @@
 
   function start(data) {
     state = (data && data.state) || freshState();
-    if (state.phase === 'rip' && !state.opened) state.opened = false;
+    if (data && data.state) uid = Math.max(uid, ...state.inv.map(i => i.id), 0);
     render();
   }
-  if (window.claude && window.claude.hot) {
-    window.claude.hot.snapshot && window.claude.hot.snapshot(() => ({ state }));
-  }
-  if (window.claude && window.claude.hot && window.claude.hot.ready) window.claude.hot.ready(start);
-  else start((window.claude && window.claude.hot && window.claude.hot.data) || {});
+  const hot = window.claude && window.claude.hot;
+  if (hot && hot.snapshot) hot.snapshot(() => ({ state }));
+  if (hot && hot.ready) hot.ready(start);
+  else start((hot && hot.data) || {});
+
+  // test hook for automated balance checks (harmless in play)
+  window.__palletRip = { get state() { return state; }, autoSort, settle };
 })();
 </script>
 </body>
