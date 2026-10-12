@@ -26,8 +26,12 @@
     --tape:       rgba(232, 211, 162, 0.92);
     --sticker:    #e2462c;  /* clearance-sticker red */
     --forklift:   #f2b705;  /* jackpot / forklift yellow */
-    --gain:       #23743f;
+    /* Color rule: green = money in, red = money out or risk, yellow = best pick / jackpot. */
+    --gain:       #1d7a3e;
+    --gain-tint:  rgba(29, 122, 62, 0.10);
     --loss:       #b3261e;
+    --loss-tint:  rgba(179, 38, 30, 0.08);
+    --pick-tint:  #fff4c2;
     --warn:       #a85d00;
     --shadow:     rgba(55, 33, 12, 0.28);
     --scrim:      rgba(31, 27, 22, 0.55);
@@ -162,16 +166,29 @@
     font-weight: 900; font-size: 1.9rem; line-height: 1; font-stretch: 75%;
   }
   .grade small { display: block; font-size: 0.5rem; letter-spacing: 0.1em; margin-top: -2px; }
+  .lot-nums { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) minmax(0, 1fr); gap: 8px; align-items: stretch; }
+  .lot-nums small, .kv small { display: block; font-family: var(--f-body); font-size: 0.62rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; }
+  .pricetag {
+    background: var(--sticker); color: var(--paper); padding: 8px 10px; border-radius: 4px;
+    font-family: var(--f-mono); font-weight: 600; font-size: 1.6rem; line-height: 1.05; font-variant-numeric: tabular-nums;
+    transform: rotate(-1.5deg); box-shadow: 2px 2px 0 var(--ink);
+  }
+  .pricetag small { color: rgba(255,255,255,0.85); }
+  .pricetag s { font-size: 0.8rem; font-weight: 400; opacity: 0.8; }
+  .kv { padding: 8px 4px; min-width: 0; }
+  .kv small { color: var(--ink-soft); }
+  .kv b { font-family: var(--f-mono); font-size: 1.05rem; font-weight: 600; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+  .kv .unknown { font-family: var(--f-marker); font-weight: 400; color: var(--sticker); font-size: 0.95rem; }
+  .lot-facts { margin: 0; font-size: 0.85rem; color: var(--ink-soft); }
+  .btn.block { width: 100%; margin-top: auto; }
   .lot dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; font-size: 0.92rem; }
   .lot dt { color: var(--ink-soft); }
   .lot dd { margin: 0; text-align: right; font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
   .lot dd.unknown { font-family: var(--f-marker); color: var(--sticker); }
   .tells { display: flex; flex-wrap: wrap; gap: 6px; }
-  .tells span {
-    font-size: 0.74rem; font-weight: 700; padding: 2px 8px; border-radius: 999px; border: 1.5px solid currentColor;
-  }
-  .tells .good { color: var(--gain); }
-  .tells .bad { color: var(--loss); }
+  .tells span { font-size: 0.78rem; font-weight: 700; padding: 3px 9px; border-radius: 999px; }
+  .tells .good { color: var(--gain); background: var(--gain-tint); }
+  .tells .bad { color: var(--loss); background: var(--loss-tint); }
   .tells-h { font-size: 0.66rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-soft); }
   .barcode {
     height: 30px;
@@ -267,6 +284,12 @@
   .tag .nm { font-weight: 700; font-stretch: 85%; line-height: 1.15; font-size: 0.96rem; }
   .tag .meta { display: flex; flex-wrap: wrap; gap: 4px 6px; align-items: center; }
   .tag .size { font-size: 0.7rem; font-weight: 700; color: var(--ink-soft); }
+  .tag .hero { margin-top: auto; display: grid; line-height: 1.05; }
+  .tag .hero b { font-family: var(--f-mono); font-size: 1.45rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .tag .hero small { font-size: 0.72rem; font-weight: 700; color: var(--ink-soft); margin-top: 2px; }
+  .hero.pos b, .opt .n.pos { color: var(--gain); }
+  .hero.neg b, .opt .n.neg { color: var(--loss); }
+  .hero.zero b, .opt .n.zero { color: var(--ink-soft); }
   .tag .vals { margin-top: auto; font-family: var(--f-mono); font-size: 0.78rem; font-variant-numeric: tabular-nums; color: var(--ink-soft); }
   .tag .vals b { color: var(--ink); font-weight: 600; }
   .cond {
@@ -283,6 +306,7 @@
     background: var(--forklift); color: var(--ink); font-weight: 900; font-size: 0.7rem; letter-spacing: 0.12em;
     padding: 3px 7px; transform: rotate(8deg); border: 2px solid var(--ink);
   }
+  .chip.todo { background: transparent; border-top: 2px dashed var(--paper-edge); color: var(--ink-soft); }
   .chip {
     display: block; margin: 4px -12px -12px; padding: 7px 12px;
     font-size: 0.74rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase;
@@ -303,6 +327,7 @@
   }
   .active-list summary span { font-family: var(--f-mono); font-weight: 400; text-transform: none; letter-spacing: 0; color: var(--ink-soft); font-size: 0.85rem; }
   .active-list ul { list-style: none; margin: 0; padding: 0 14px 12px; display: grid; gap: 6px; }
+  .active-list li .where { display: block; text-align: left; }
   .active-list li { display: grid; grid-template-columns: auto minmax(0,1fr) auto; gap: 10px; align-items: center; font-size: 0.9rem; border-top: 1px dashed var(--paper-edge); padding-top: 6px; }
   .active-list li .where { font-family: var(--f-mono); font-size: 0.75rem; color: var(--ink-soft); text-align: right; }
   .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
@@ -345,7 +370,10 @@
   .seg button small { display: block; font-weight: 500; font-size: 0.7rem; color: var(--ink-soft); }
   .seg button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
   .seg button[aria-pressed="true"] small { color: var(--paper-edge); }
-  .opts { display: grid; gap: 8px; margin-top: 14px; }
+  .opts { display: grid; gap: 8px; margin-top: 10px; }
+  .opts-h { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin: 18px 0 8px; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-soft); }
+  .left-pill { font-family: var(--f-mono); letter-spacing: 0; text-transform: none; font-size: 0.8rem; background: var(--ink); color: var(--paper); padding: 3px 8px; border-radius: 999px; }
+  .sheet-head .sub b { font-family: var(--f-mono); font-weight: 600; color: var(--ink); }
   .opt {
     position: relative; text-align: left; width: 100%;
     display: grid; grid-template-columns: 8px minmax(0,1fr) auto; gap: 4px 12px; align-items: center;
@@ -355,14 +383,15 @@
   .opt:hover:not([disabled]) { border-color: var(--ink); }
   .opt .stripe { grid-row: 1 / span 3; align-self: stretch; }
   .opt .t { font-weight: 800; font-stretch: 85%; font-size: 1rem; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-  .opt .n { font-family: var(--f-mono); font-weight: 600; font-variant-numeric: tabular-nums; text-align: right; }
-  .opt .n.neg { color: var(--loss); }
-  .opt .d { grid-column: 2 / span 2; font-size: 0.8rem; color: var(--ink-soft); font-family: var(--f-mono); }
-  .opt .w { grid-column: 2 / span 2; font-size: 0.8rem; display: grid; gap: 2px; }
-  .opt .w .bad { color: var(--loss); }
-  .opt .w .good { color: var(--gain); }
-  .opt .w .meh { color: var(--ink-soft); }
-  .opt[aria-pressed="true"] { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); background: #fffdf6; }
+  .opt .n { font-family: var(--f-mono); font-weight: 600; font-size: 1.5rem; line-height: 1; font-variant-numeric: tabular-nums; text-align: right; }
+  .opt .d { grid-column: 2 / span 2; font-size: 0.82rem; color: var(--ink-soft); display: flex; flex-wrap: wrap; gap: 0 6px; align-items: baseline; }
+  .opt .d .time { color: var(--ink); font-weight: 800; }
+  .opt .d .rng { margin-left: auto; font-family: var(--f-mono); font-size: 0.75rem; }
+  .opt .w { grid-column: 2 / span 2; font-size: 0.8rem; font-weight: 600; padding: 4px 8px; border-radius: 4px; }
+  .opt .w.bad { color: var(--loss); background: var(--loss-tint); }
+  .opt .w.good { color: var(--gain); background: var(--gain-tint); }
+  .opt.pro-row { background: var(--pick-tint); border-color: var(--forklift); border-width: 3px; }
+  .opt[aria-pressed="true"] { border-color: var(--ink); border-width: 3px; }
   .opt[disabled] { opacity: 0.5; cursor: not-allowed; }
   .pro {
     font-size: 0.62rem; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase;
@@ -394,6 +423,13 @@
   .receipt .ln.neg span:last-child { color: var(--loss); }
   .receipt .ln.pos span:last-child { color: var(--gain); }
   .receipt .ln.zero span:last-child { color: var(--ink-soft); }
+  .be { display: grid; grid-template-columns: auto minmax(0,1fr) 4.5em; gap: 8px; align-items: center; padding: 3px 0; font-size: 0.8rem; }
+  .be-bar { height: 10px; background: var(--paper-edge); border-radius: 999px; overflow: hidden; }
+  .be-bar i { display: block; height: 100%; background: var(--ink-soft); border-radius: 999px; }
+  .be.done .be-bar i { background: var(--gain); }
+  .be-p { text-align: right; }
+  .be.done .be-p { color: var(--gain); font-weight: 600; }
+  .lead-line { margin: 0; font-weight: 700; font-size: 1.05rem; max-width: 60ch; }
   .receipt .rule { border-top: 2px dashed var(--ink-soft); margin: 10px 0; }
   .receipt .ln.big { font-weight: 600; font-size: 1.02rem; }
   @keyframes print { from { opacity: 0; transform: translateY(-4px); } }
@@ -539,8 +575,8 @@
     L: { name: 'Gaylord box',  n: [15, 20] }
   };
 
-  const GOOD_TELLS = ['Shrink-wrap intact', 'Square, stable stack', 'Clean retail boxes', 'Everyday items visible', 'No return labels'];
-  const BAD_TELLS  = ['Crushed corners', 'Return labels everywhere', 'Heavy dirt', 'Torn boxes', 'Leaning stack', 'Loose stuff on top'];
+  const GOOD_TELLS = ['Original packaging intact', 'Brands you recognize', 'Year-round demand', 'Manageable size and weight', 'Condition visible'];
+  const BAD_TELLS  = ['Water damage', 'Musty smell', 'Warped cardboard', 'No recognizable brands', 'Crushed corners', 'Return labels everywhere'];
 
   // [icon, name, low, high, size]  low/high = sold comps for a new one, shipped
   const CATALOG = {
@@ -570,32 +606,30 @@
     },
     'Apparel': {
       dud:     [['🧦','Novelty socks, lot of 30',3,8],['🎃','Kids costume, size M',3,8],['🩴','Single Croc',1,2],['👔','Belt, no buckle',1,3]],
-      common:  [['👕','Nike Dri-FIT tees, lot of 3',20,35],['👖','Levi\'s 501 jeans',25,40],['🧢','Carhartt beanie',12,20],['🧥','Under Armour hoodie',25,40]],
-      good:    [['🩱','Lululemon Align leggings',50,75],['🧶','Patagonia Better Sweater',70,100],['🧥','North Face Nuptse jacket',150,220,'M']],
+      common:  [['👕','Nike Dri-FIT tees, lot of 3',20,35],['👟','Nike cleats, unworn',15,25,'M'],['👖','Levi\'s 501 jeans',25,40],['🧢','Carhartt beanie',12,20],['🧥','Under Armour hoodie',25,40]],
+      good:    [['👟','Hoka Clifton 9, unworn',110,140,'M'],['👟','On Cloudmonster, unworn',120,150,'M'],['🩱','Lululemon Align leggings',50,75],['🧶','Patagonia Better Sweater',70,100],['🧥','North Face Nuptse jacket',150,220,'M']],
       jackpot: [['👟','Jordan 4 Retro, size 10',250,380,'M'],['🧥','Canada Goose parka',450,650,'M'],['🧥','Arc\'teryx Beta AR shell',300,420]]
     }
   };
   const CATS = Object.keys(CATALOG);
   const LOT_CATS = CATS.concat(['General merch', 'General merch']);
 
-  // From the guide, "Pallets to Profit"
-  const TIPS = {
-    paid:    'You don\'t get paid when you buy inventory. You get paid when it sells.',
-    tells:   'Pallets usually tell on themselves. Torn boxes, heavy dirt, crushed corners and lots of return labels usually mean more work and more surprises.',
-    rule25:  'The 25% rule: on online marketplaces, aim to spend no more than 25% of the sale price, shipped, on the item.',
-    golf:    'Large items are not always worth shipping. A $13 golf bag sells for about $90 on eBay and $50 on Marketplace. The box alone is $6. It sold on Marketplace the next day.',
-    open:    'Open box does not mean complete. Missing parts kill value fast, and even a missing manual can trigger an INAD return.',
-    test:    'Test beyond "it turns on." Run the espresso machine, let the ice maker make ice, run the vacuum for a few minutes.',
-    bundle:  'Bundling is a beginner superpower. Avoid listing items under $10 on their own. Group them into themed lots.',
-    feedback:'Early on, fight for feedback harder than you fight for profit. Don\'t list very expensive items right away.',
-    curb:    'Free is undefeated. Don\'t overlook curb alerts.',
-    see:     'If they don\'t see it, they can\'t buy it. Bring one or two related items to the meetup.',
-    meetup:  'Schedule meetups so you still win if the buyer flakes. Don\'t leave until they confirm they\'re on the way.',
-    sort:    'Reselling is really a sorting business. Fast Cash, Standard List, Bundle, Parts, Donate.',
-    retail:  'Retail value is not resale value. Trust sold comps, not the MSRP on the manifest.',
-    review:  'Don\'t buy another pallet before you review the first one.',
-    speed:   'Speed matters. The faster you sort, test and list, the faster inventory turns back into cash.'
-  };
+  // Only things that plug in or take batteries can be dead on arrival. Testing is for electronics.
+  const POWERED = new Set([
+    'Single AirPod (left)', 'TV remote, brand unknown', 'Wireless mouse, no dongle',
+    'JBL Flip 5 speaker', 'Fitbit Inspire 3', 'Xbox wireless controller', 'Smart bulb 4-pack', 'Ring video doorbell', 'USB podcast mic',
+    'Bose QC45 headphones', 'iPad 9th gen', '27-inch 4K monitor', 'DJI Mini drone',
+    'MacBook Air M2', 'Sony a6400 camera body', 'Meta Quest 3', 'Nintendo Switch OLED',
+    '5-qt air fryer', 'Keurig K-Mini', 'Shark handheld vac', 'Instant Pot Duo',
+    'Roomba i3', 'Nespresso Vertuo', 'Vitamix blender', 'Ninja Creami',
+    'Dyson V15 Detect', 'KitchenAid Artisan mixer', 'Breville Barista Express',
+    'Kids electric scooter',
+    'Rechargeable work light', 'Ryobi circular saw', 'DeWalt 20V battery',
+    'Milwaukee M18 impact driver', 'Pancake air compressor', 'Makita rotary hammer',
+    'DeWalt 6-tool combo kit', 'EGO 56V lawn mower', 'Portable generator'
+  ]);
+  // Brands known to flag and take down secondhand listings.
+  const RESTRICTED = /Dyson/;
 
   const EVENTS = [
     { w: 3, text: 'Your unboxing short hit 412K views. Online listings sell faster and for 15% more tomorrow.', apply: s => { s.nextMods.hype = true; } },
@@ -646,9 +680,11 @@
     const c = cat === 'General merch' ? pick(CATS) : cat;
     const tier = weighted(GRADES[grade].tier);
     const [icon, name, low, high, size] = pick(CATALOG[c][tier]);
-    const cond = weighted(GRADES[grade].cond);
+    const powered = POWERED.has(name);
+    let cond = weighted(GRADES[grade].cond);
+    if (cond === 'UNTESTED' && !powered) cond = 'OPEN';
     return {
-      id: ++uid, icon, name, cat: c, tier, low, high, size: size || 'S', cond,
+      id: ++uid, icon, name, cat: c, tier, low, high, size: size || 'S', cond, powered,
       dead: cond === 'UNTESTED' && Math.random() < DOA_RATE,
       status: 'shelf', from: day, plan: null, listed: null
     };
@@ -659,6 +695,7 @@
     return out;
   }
   const cmult = it => COND[it.cond].mult;
+  const condLabel = it => it.cond === 'BROKEN' && !it.powered ? 'Damaged' : COND[it.cond].label;
   const range = it => [it.low * cmult(it), it.high * cmult(it)];
   const midv = it => (it.low + it.high) / 2 * cmult(it);
   const shipCost = it => it.ship != null ? it.ship : SHIP[it.size];
@@ -679,7 +716,10 @@
     return Math.min(0.95, TIER_SPEED[it.tier] * PRICING[pricing].speed * CH[ch].speed * fbF * s.up.photo * hype);
   }
   const fbRange = it => { const m = midv(it); return [m * 0.5, m * 0.72]; };
-  const bundleShare = it => midv(it) * 0.6 * (1 - CH.ebay.fee) - 3;
+  // Bundles are priced to move: buyers pay for convenience, so a lot never values any one piece above ~$20.
+  const BUNDLE_CAP = 20;
+  const bundleValue = it => Math.min(midv(it), BUNDLE_CAP) * 0.6 * (it.cond === 'UNTESTED' ? 1 - DOA_RATE : 1);
+  const bundleShare = it => bundleValue(it) * (1 - CH.ebay.fee) - 1;
 
   // Evaluate one way of selling an item. Used by the sheet, the Pro pick and lot pricing.
   function evalOption(it, ch, pricing, s) {
@@ -698,10 +738,14 @@
       }
       const p = sellChance(it, ch, pricing, s);
       res.days = Math.max(1, Math.round(1 / p));
-      res.when = res.days <= 1 ? 'likely sells tonight' : `sells in ~${res.days} days`;
+      res.when = res.days <= 1 ? 'sells fast' : `~${res.days} days to sell`;
+      if (RESTRICTED.test(it.name)) {
+        res.notes.unshift(['bad', 'Dyson flags secondhand listings. It may get pulled. Sell it locally.']);
+        exp *= 0.5;
+      }
       if (c.ships && it.size === 'L') res.notes.push(['bad', `Bulky: the label alone is ${money(SHIP.L)}. Local might net more.`]);
       if (res.hi < 10 && it.cond !== 'BROKEN') res.notes.push(['bad', 'Under $10 after fees and shipping. Bundle it instead.']);
-      if (it.cond === 'BROKEN') res.notes.push(['meh', 'Listed "for parts or not working."']);
+      if (it.cond === 'BROKEN') res.notes.push(['meh', it.powered ? 'Listed "for parts or not working."' : 'Listed as-is, flaws shown.']);
       if (s.feedback < SCAM_FEEDBACK && onlinePrice(it, ch, pricing, 0.5) > SCAM_PRICE) {
         res.notes.push(['bad', `New seller with ${s.feedback} feedback and a high-dollar item. Scammers love that combo.`]);
         exp -= SCAM_RATE * (exp + shipCost(it));
@@ -716,6 +760,7 @@
       let exp = (res.lo + res.hi) / 2 * (1 - NO_SHOW);
       if (it.cond === 'UNTESTED') { exp *= (1 - DOA_RATE); res.notes.push(['bad', 'Buyer will test it at pickup. If it\'s dead, they walk.']); }
       res.when = 'cash today';
+      if (RESTRICTED.test(it.name)) res.notes.push(['good', 'No listing takedowns locally.']);
       if (it.size === 'L') res.notes.push(['good', 'Bulky stuff sells best locally. No box, no label.']);
       res.notes.push(['meh', `Expect lowballers. ${Math.round(NO_SHOW * 100)}% chance of a no-show.`]);
       res.exp = exp;
@@ -725,6 +770,7 @@
       res.lo = res.hi = res.exp = bundleShare(it);
       const cats = new Set(others.map(x => x.cat).concat([it.cat]));
       res.when = others.length ? `joins a lot of ${others.length + 1}` : 'starts a new lot (needs 2+)';
+      if (midv(it) > 30) res.notes.push(['bad', 'Worth more on its own. Bundles are for low-dollar items.']);
       res.notes.push(cats.size > 1 ? ['bad', 'Mixed categories: lots with no clear theme sell for less.'] : ['good', `Themed ${it.cat} lot. Buyers like a clear theme.`]);
     } else {
       res.when = 'gone today';
@@ -772,7 +818,7 @@
     const cat = pick(LOT_CATS);
     const items = makeItems(cat, grade, size, state.day);
     const g = GRADES[grade];
-    const base = expectedValue(cat, grade, size) * rand(...g.factor) * 0.9;
+    const base = expectedValue(cat, grade, size) * rand(...g.factor);
     const list = round5(base);
     const price = round5(base * (state.mods.discount || 1));
     const msrp = g.manifest ? Math.round(items.reduce((s, it) => s + it.high, 0) * 1.9 * rand(0.85, 1.2) / 10) * 10 : null;
@@ -781,8 +827,10 @@
     const nBad = Math.max(0, Math.min(3, Math.round(badShare * 6 + rand(-0.7, 0.7))));
     const tells = shuffle(BAD_TELLS).slice(0, nBad).map(t => ['bad', t])
       .concat(shuffle(GOOD_TELLS).slice(0, 3 - nBad).map(t => ['good', t]));
+    const no = randi(1000, 9999) + '-' + 'ABCDEFGHJKLMNPQRSTUVWXYZ'[randi(0, 23)];
+    items.forEach(it => { it.lot = no; });
     return {
-      no: randi(1000, 9999) + '-' + 'ABCDEFGHJKLMNPQRSTUVWXYZ'[randi(0, 23)],
+      no,
       grade, size, cat, items, list, price, msrp, tells: shuffle(tells),
       source: pick(g.sources), units: items.length
     };
@@ -798,7 +846,7 @@
       phase: 'intro', day: 1, cash: START_CASH, feedback: 0,
       up: { ebayMin: 30, fbMin: 45, photo: 1 },
       mods: {}, nextMods: {}, lots: [], lot: null, opened: true, testMin: 0,
-      inv: [], ledger: null, event: null, sheet: null,
+      inv: [], owned: [], ledger: null, event: null, sheet: null,
       stats: { spent: 0, revenue: 0, pallets: 0, jackpots: 0, acquired: 0, sold: 0, inad: 0, scams: 0, noShows: 0,
                onlineSales: 0, localSales: 0, donated: 0, bulkyShipped: 0, cheapListed: 0, bestFlip: null, bestLot: null, worstLot: null }
     };
@@ -866,10 +914,6 @@
       <div class="stencil">${top}<b>${big}</b></div>
     </div>`;
   }
-  function tipHTML(key) {
-    return `<aside class="tip"><small>From Pallets to Profit</small><p>${TIPS[key]}</p></aside>`;
-  }
-
   function renderIntro() {
     const best = loadBest();
     $('#stage').innerHTML = `
@@ -926,31 +970,21 @@
       <article class="lot ${can ? '' : 'cant'}">
         <div class="lot-top">
           <div>
-            <div class="lot-no">LOT #${l.no}</div>
+            <div class="lot-no">LOT #${l.no} · ${GRADES[l.grade].name}</div>
             <div class="lot-src">${l.source}</div>
           </div>
           <div class="grade" title="${GRADES[l.grade].name}">${l.grade}<small>TYPE</small></div>
         </div>
-        <dl>
-          <dt>Condition</dt><dd>${GRADES[l.grade].name}</dd>
-          <dt>Size</dt><dd>${SIZES[l.size].name}</dd>
-          <dt>Category</dt><dd>${l.cat}</dd>
-          <dt>Units</dt><dd>${approx ? '~' : ''}${units}</dd>
-          <dt>Cost per unit</dt><dd>${approx ? '~' : ''}${money(l.price / units)}</dd>
-          <dt>Manifest MSRP</dt>${l.msrp ? `<dd>${money(l.msrp)}</dd>` : `<dd class="unknown">no manifest</dd>`}
-        </dl>
-        <div>
-          <div class="tells-h">Curb appeal</div>
-          <div class="tells">${l.tells.map(([k, t]) => `<span class="${k}">${t}</span>`).join('')}</div>
+        <div class="lot-nums">
+          <div class="pricetag"><small>Price</small>${l.price !== l.list ? `<s>${money(l.list)}</s> ` : ''}${money(l.price)}</div>
+          <div class="kv"><small>Per unit</small><b>${approx ? '~' : ''}${money(l.price / units)}</b></div>
+          <div class="kv"><small>Retail</small><b>${l.msrp ? money(l.msrp) : '<span class="unknown">no manifest</span>'}</b></div>
         </div>
-        <div class="barcode" aria-hidden="true"></div>
-        <div class="lot-foot">
-          <div class="price">${l.price !== l.list ? `<s>${money(l.list)}</s>` : ''}${money(l.price)}</div>
-          <button class="btn ${can ? 'hot' : ''}" data-buy="${i}" ${can ? '' : 'disabled'}>${can ? 'Buy it' : 'Too rich'}</button>
-        </div>
+        <div class="tells">${l.tells.map(([k, t]) => `<span class="${k}">${k === 'good' ? '✓' : '✕'} ${t}</span>`).join('')}</div>
+        <p class="lot-facts">${SIZES[l.size].name} · ${l.cat} · ${approx ? '~' : ''}${units} units</p>
+        <button class="btn ${can ? '' : ''} block" data-buy="${i}" ${can ? '' : 'disabled'}>${can ? 'Buy this lot' : 'Not enough cash'}</button>
       </article>`;
     }).join('');
-    const tipKey = state.day === 1 ? 'tells' : held > 12 ? 'review' : pick(['tells', 'rule25', 'retail', 'paid', 'curb']);
     $('#stage').innerHTML = `
       <div class="stage-head">
         <div>
@@ -963,8 +997,7 @@
       <div class="lots">${lotsHTML}</div>
       <div class="row skip-row">
         <button class="btn ghost" id="skip">${held || act ? 'Skip the truck, work the shelf' : 'Sit today out'}</button>
-      </div>
-      <div style="margin-top:26px">${tipHTML(tipKey)}</div>`;
+      </div>`;
     document.querySelectorAll('[data-buy]').forEach(b => b.onclick = () => buy(+b.dataset.buy));
     $('#skip').onclick = () => { state.phase = 'bench'; state.lot = null; state.opened = true; render(); };
   }
@@ -977,6 +1010,7 @@
     state.stats.pallets += 1;
     state.stats.acquired += l.items.length;
     state.lot = l;
+    state.owned.push({ no: l.no, source: l.source, price: l.price, recovered: 0, day: state.day });
     state.phase = 'bench';
     state.opened = false;
     renderBar(true);
@@ -1023,8 +1057,7 @@
       ${old.length ? `<section class="bench-section"><h3>On the shelf <small>${old.length} waiting since earlier</small></h3><div class="tags" id="tags-old"></div></section>` : ''}
       ${!fresh.length && !old.length ? `<section class="bench-section"><p class="note">Nothing to sort. ${acts.length ? 'Your active listings will keep selling when you close up.' : 'Buy a lot tomorrow.'}</p></section>` : ''}
       ${acts.length ? `<section class="bench-section"><details class="active-list"><summary>Active listings · ${acts.length}<span>${money(acts.reduce((s, it) => s + onlinePrice(it, it.listed.ch, it.listed.pricing, 0.5), 0))} listed</span></summary><ul>${acts.map(it => `
-        <li><span class="dot" style="background:${CH[it.listed.ch].color}"></span><span>${it.icon} ${it.name}</span><span class="where">${CH[it.listed.ch].name} · day ${state.day - it.listed.day + 1}</span></li>`).join('')}</ul></details></section>` : ''}
-      <div style="margin-top:26px">${tipHTML(state.justOpened ? 'sort' : pick(['speed', 'bundle', 'golf', 'test', 'open']))}</div>`;
+        <li><span class="dot" style="background:${CH[it.listed.ch].color}"></span><span>${it.icon} ${it.name}<span class="where">${CH[it.listed.ch].name} · listed ${state.day - it.listed.day + 1}d</span></span>${it.members ? '' : `<button class="btn ghost small" data-pull="${it.id}">Pull</button>`}</li>`).join('')}</ul><p class="note" style="padding:0 14px 12px;margin:0">Not selling? Sometimes it's the platform. Pull it and sort it again.</p></details></section>` : ''}`;
     const draw = (el, items) => {
       if (!el) return;
       el.innerHTML = items.map((it, idx) => tagHTML(it, state.justOpened && fresh.includes(it) ? idx : -1)).join('');
@@ -1033,21 +1066,36 @@
     draw($('#tags-old'), old);
     state.justOpened = false;
     document.querySelectorAll('.tag').forEach(t => t.onclick = () => openSheet(+t.dataset.id));
+    document.querySelectorAll('[data-pull]').forEach(b => b.onclick = () => {
+      const it = state.inv.find(x => x.id === +b.dataset.pull);
+      it.status = 'shelf'; it.listed = null; it.plan = null;
+      const y = window.scrollY; renderBench(); renderBar(); window.scrollTo(0, y);
+    });
     updateClock();
   }
 
+  // The one number to look at for an option: what you'd likely put in your pocket.
+  function optionValue(it, ch, pricing) {
+    const o = evalOption(it, ch, CH[ch].kind === 'online' ? pricing : 'market');
+    if (!o.ok) return null;
+    return CH[ch].kind === 'donate' ? 0 : CH[ch].kind === 'bundle' ? o.exp : (o.lo + o.hi) / 2;
+  }
+  const moneyCls = v => v > 0.5 ? 'pos' : v < -0.5 ? 'neg' : 'zero';
+
   function tagHTML(it, animIdx) {
-    const [a, b] = range(it);
     const plan = it.plan;
+    let label, v;
+    if (plan) { label = CH[plan.ch].name; v = optionValue(it, plan.ch, plan.pricing); }
+    else { const pp = proPick(it); label = 'Best: ' + CH[pp.ch].name; v = optionValue(it, pp.ch, pp.pricing); }
     const chip = plan
-      ? `<span class="chip ${plan.ch}">${CH[plan.ch].name}${CH[plan.ch].kind === 'online' ? ' · ' + PRICING[plan.pricing].label : ''}</span>`
-      : `<span class="chip">Tap to sort</span>`;
+      ? `<span class="chip ${plan.ch}">✓ ${CH[plan.ch].name}${CH[plan.ch].kind === 'online' ? ' · ' + PRICING[plan.pricing].label : ''}</span>`
+      : `<span class="chip todo">Tap to sort</span>`;
     return `<button class="tag ${it.tier === 'jackpot' ? 'jackpot' : ''} ${plan ? 'planned' : ''}" data-id="${it.id}"
         style="${animIdx >= 0 ? `animation-delay:${animIdx * 80}ms` : 'animation:none'}">
       <span class="ico" aria-hidden="true">${it.icon}</span>
       <span class="nm">${it.name}</span>
-      <span class="meta"><span class="cond ${it.cond}">${COND[it.cond].label}</span><span class="size">${SIZE_LABEL[it.size]}</span></span>
-      <span class="vals">Comps <b>${money(a)}–${money(b)}</b>${it.cond === 'UNTESTED' ? '*' : ''}</span>
+      <span class="meta"><span class="cond ${it.cond}">${condLabel(it)}</span>${it.size === 'L' ? '<span class="size">Bulky</span>' : ''}</span>
+      <span class="hero ${moneyCls(v)}"><b>${(plan && plan.ch === 'donate') || Math.abs(v) < 0.5 ? '$0' : v < 0 ? money(v) : '~' + money(v)}</b><small>${label}</small></span>
       ${chip}
     </button>`;
   }
@@ -1140,25 +1188,28 @@
     const [a, b] = range(it);
     const pp = proPick(it);
     const left = timeLeft() + planTime(it) + (it.plan && it.plan.ch === 'bundle' && shelf().filter(x => x.plan && x.plan.ch === 'bundle').length === 1 ? BUNDLE_MIN : 0);
-    const opts = CH_ORDER.map(ch => {
-      const o = evalOption(it, ch, CH[ch].kind === 'online' ? pr : 'market');
+    const optRow = ch => {
+      const kind = CH[ch].kind;
+      const o = evalOption(it, ch, kind === 'online' ? pr : 'market');
+      if (!o.ok) return '';
       const fits = o.time <= left;
       const chosen = it.plan && it.plan.ch === ch;
-      const dis = !o.ok || (!fits && !chosen);
-      const net = CH[ch].kind === 'donate' ? '$0'
-        : CH[ch].kind === 'bundle' ? `+${money(Math.max(0, o.exp))}`
-        : `${money(o.lo)}–${money(o.hi)}`;
-      const netCls = o.hi < 0 ? 'neg' : '';
-      const detail = !o.ok ? o.why
-        : `${CH[ch].kind === 'local' ? 'Cash' : CH[ch].kind === 'online' ? 'Net after fees' + (CH[ch].ships ? ' & shipping' : '') : CH[ch].kind === 'bundle' ? 'Adds to the lot' : 'No money'} · ${o.time ? hm(o.time) : 'no time'} · ${o.when}${!fits && !chosen ? ' · not enough time today' : ''}`;
-      return `<button class="opt" data-ch="${ch}" aria-pressed="${chosen}" ${dis ? 'disabled' : ''}>
+      const isPro = pp && pp.ch === ch;
+      const v = optionValue(it, ch, pr);
+      const big = kind === 'donate' || Math.abs(v) < 0.5 ? '$0' : v < 0 ? money(v) : (kind === 'bundle' ? '+' : '~') + money(v);
+      const rng = kind === 'online' || kind === 'local' ? `${money(o.lo)}–${money(o.hi)}` : '';
+      const note = o.notes.find(n => n[0] === 'bad') || o.notes.find(n => n[0] === 'good');
+      const timeTxt = o.time ? hm(o.time) : 'no time';
+      return `<button class="opt ${isPro ? 'pro-row' : ''}" data-ch="${ch}" aria-pressed="${chosen}" ${!fits && !chosen ? 'disabled' : ''}>
         <span class="stripe" style="background:${CH[ch].color}"></span>
-        <span class="t">${CH[ch].name}${pp && pp.ch === ch ? ' <span class="pro">Pro pick</span>' : ''}${chosen ? ' <span class="picked">Chosen</span>' : ''}</span>
-        <span class="n ${netCls}">${o.ok ? net : ''}</span>
-        <span class="d">${detail}</span>
-        ${o.ok && o.notes.length ? `<span class="w">${o.notes.map(([k, t]) => `<span class="${k}">${t}</span>`).join('')}</span>` : ''}
+        <span class="t">${CH[ch].name}${isPro ? ' <span class="pro">Best pick</span>' : ''}${chosen ? ' <span class="picked">✓ Chosen</span>' : ''}</span>
+        <span class="n ${moneyCls(v)}">${big}</span>
+        <span class="d"><b class="time">${timeTxt}</b> · ${!fits && !chosen ? 'not enough time today' : o.when}${rng ? `<span class="rng">${rng}</span>` : ''}</span>
+        ${note ? `<span class="w ${note[0]}">${note[1]}</span>` : ''}
       </button>`;
-    }).join('');
+    };
+    const online = ['ebay', 'mercari', 'posh'].map(optRow).join('');
+    const other = ['fb', 'bundle', 'donate'].map(optRow).join('');
     const flash = state.sheet.flash;
     root.innerHTML = `
       <div class="scrim" id="scrim"></div>
@@ -1167,22 +1218,19 @@
           <span class="ico" aria-hidden="true">${it.icon}</span>
           <div>
             <h3 id="sheet-title">${it.name}</h3>
-            <div class="sub"><span class="cond ${it.cond}">${COND[it.cond].label}</span><span>${SIZE_LABEL[it.size]} · ships for ${money(shipCost(it))}</span><span>${it.cat}</span></div>
+            <div class="sub"><span class="cond ${it.cond}">${condLabel(it)}</span><span>Sold comps <b>${money(a)}–${money(b)}</b></span><span>${it.size === 'L' ? 'Bulky, ' : ''}ships for ${money(shipCost(it))}</span></div>
           </div>
           <button class="x" id="x" aria-label="Close">×</button>
         </div>
-        <div class="comps">
-          <div><small>Sold comps</small>${money(a)}–${money(b)}</div>
-          <div><small>Local price</small>${money(fbRange(it)[0])}–${money(fbRange(it)[1])}</div>
-          <div><small>Time left</small>${hm(timeLeft())}</div>
-        </div>
-        ${flash ? `<div class="test-result ${flash}">${flash === 'good' ? 'Works. Ran it through a full cycle. It\'s open box now.' : 'Dead. Glad you checked. It\'s a parts unit now.'}</div>` : ''}
-        ${it.cond === 'UNTESTED' ? `<div class="test-row"><p><b>Untested.</b> ${Math.round(DOA_RATE * 100)}% of these are dead. Testing takes ${TEST_MIN} minutes and kills the return risk.</p><button class="btn small" id="test" ${timeLeft() < TEST_MIN ? 'disabled' : ''}>Test it · ${TEST_MIN}m</button></div>` : ''}
-        <div class="seg-h">Online pricing</div>
+        ${flash ? `<div class="test-result ${flash}">${flash === 'good' ? '✓ Works. Ran it through a full cycle. Now it\'s open box.' : '✕ Dead. Glad you checked. It\'s a parts unit now.'}</div>` : ''}
+        ${it.cond === 'UNTESTED' ? `<div class="test-row"><p><b>Untested electronics.</b> ${Math.round(DOA_RATE * 100)}% are dead. A ${TEST_MIN}-minute test removes the return risk.</p><button class="btn small" id="test" ${timeLeft() < TEST_MIN ? 'disabled' : ''}>Test it · ${TEST_MIN}m</button></div>` : ''}
+        <div class="opts-h"><span>Ship it</span><span class="left-pill">${hm(timeLeft())} left today</span></div>
         <div class="seg" role="group" aria-label="Online pricing">
           ${Object.keys(PRICING).map(k => `<button data-pr="${k}" aria-pressed="${k === pr}">${PRICING[k].label}<small>${PRICING[k].hint}</small></button>`).join('')}
         </div>
-        <div class="opts">${opts}</div>
+        <div class="opts">${online}</div>
+        <div class="opts-h"><span>Sell local or clear it</span></div>
+        <div class="opts">${other}</div>
         <div class="sheet-foot">
           ${it.plan ? `<button class="btn ghost small" id="unplan">Leave it on the shelf</button>` : '<span></span>'}
           <button class="btn small" id="done">Done</button>
@@ -1212,8 +1260,10 @@
   /* =========================================================
      CLOSE UP SHOP
      ========================================================= */
-  function sold(it, price) {
+  function sold(it, price, net) {
     it.status = 'sold';
+    const lots = it.memberLots || (it.lot ? [it.lot] : []);
+    lots.forEach(no => { const o = state.owned.find(x => x.no === no); if (o) o.recovered += net / lots.length; });
     state.stats.sold += it.members ? it.members.length : 1;
     state.stats.revenue += price;
     const best = state.stats.bestFlip;
@@ -1235,13 +1285,13 @@
     if (bItems.length >= 2) {
       const cats = new Set(bItems.map(i => i.cat));
       const theme = cats.size === 1 ? [...cats][0] : null;
-      const value = bItems.reduce((s, i) => s + midv(i) * 0.6, 0) * (theme ? 1 : 0.75);
+      const value = bItems.reduce((s, i) => s + bundleValue(i), 0) * (theme ? 1 : 0.75);
       const units = bItems.reduce((s, i) => s + ({ S: 1, M: 3, L: 8 })[i.size], 0);
       bItems.forEach(i => { i.status = 'gone'; i.plan = null; });
       state.inv.push({
         id: ++uid, icon: '📦', name: `${theme || 'Mixed'} lot, ${bItems.length} items`, cat: theme || 'Mixed', tier: 'common',
         low: value * 0.85, high: value * 1.15, size: 'M', ship: Math.min(45, 6 + units * 3), cond: 'NEW', dead: false,
-        status: 'active', listed: { ch: 'ebay', pricing: 'market', day: state.day }, members: bItems.map(i => i.name)
+        status: 'active', listed: { ch: 'ebay', pricing: 'market', day: state.day }, members: bItems.map(i => i.name), memberLots: bItems.map(i => i.lot).filter(Boolean)
       });
     }
 
@@ -1260,7 +1310,7 @@
         if (it.cond === 'UNTESTED') it.cond = 'OPEN';
         const price = Math.max(1, Math.round(rand(...fbRange(it))));
         add('local', `Marketplace cash: ${it.name}`, price);
-        sold(it, price); state.stats.localSales++;
+        sold(it, price, price); state.stats.localSales++;
         // Bring related items to the meetup.
         if (Math.random() < UPSELL) {
           const extra = shelf().filter(x => !x.plan && x.cond !== 'BROKEN' && midv(x) > 8);
@@ -1269,7 +1319,7 @@
             if (x.cond === 'UNTESTED') x.cond = x.dead ? 'BROKEN' : 'OPEN';
             const p2 = Math.max(1, Math.round(rand(...fbRange(x))));
             add('local', `Showed them the ${x.name} too. Sold.`, p2);
-            sold(x, p2); state.stats.localSales++; flags.upsell = true;
+            sold(x, p2, p2); state.stats.localSales++; flags.upsell = true;
           }
         }
         continue;
@@ -1286,6 +1336,11 @@
     let fees = 0, ship = 0;
     for (const it of active()) {
       const { ch, pricing } = it.listed;
+      if (RESTRICTED.test(it.name) && ch !== 'posh' && Math.random() < 0.5) {
+        add('online', `Listing pulled: the brand flagged your ${it.name}`, 0, 'zero');
+        it.status = 'shelf'; it.listed = null; flags.pulled = true;
+        continue;
+      }
       if (Math.random() >= sellChance(it, ch, pricing)) continue;
       const c = CH[ch];
       let price = onlinePrice(it, ch, pricing, Math.random()) * (state.mods.hype ? 1.15 : 1);
@@ -1303,9 +1358,10 @@
       }
       if (it.cond === 'UNTESTED') it.cond = 'OPEN';
       add('online', `${c.name}: ${it.name}`, price);
-      fees += price * c.fee + c.flat;
+      const fee = price * c.fee + c.flat;
+      fees += fee;
       ship += sc;
-      sold(it, price);
+      sold(it, price, price - fee - sc);
       state.feedback += 1;
       state.stats.onlineSales++;
     }
@@ -1351,16 +1407,6 @@
     renderBar(true);
   }
 
-  function lessonKey(f) {
-    if (f.inad || f.walked) return 'test';
-    if (f.scam) return 'feedback';
-    if (f.noShow) return 'meetup';
-    if (f.upsell) return 'see';
-    if (f.bulky) return 'golf';
-    if (f.cheap) return 'bundle';
-    return pick(['paid', 'speed', 'review', 'retail']);
-  }
-
   function renderLedger() {
     const { groups, net, flags } = state.ledger;
     const titles = { buy: 'Bought', local: 'Marketplace meetups', online: 'Online sales', costs: 'Costs' };
@@ -1385,6 +1431,10 @@
           <div class="ln big ${net >= 0 ? 'pos' : 'neg'}"><span>Day net</span><span>${signed(net)}</span></div>
           <div class="ln big"><span>Cash on hand</span><span>${money(state.cash)}</span></div>
           <div class="ln dim"><span>Still listed / on the shelf</span><span>${acts} / ${sh}</span></div>
+          ${state.owned.length ? `<div class="grp">Pallet break-even</div>${state.owned.slice(-4).reverse().map(o => {
+            const pct = Math.round(o.recovered / o.price * 100);
+            return `<div class="be ${pct >= 100 ? 'done' : ''}"><span class="be-n">#${o.no}</span><span class="be-bar"><i style="width:${Math.min(100, Math.max(0, pct))}%"></i></span><span class="be-p">${pct >= 100 ? 'Paid off' : pct + '%'}</span></div>`;
+          }).join('')}` : ''}
           <div class="stamp ${net >= 0 ? 'pos' : 'neg'}">${net >= 0 ? 'PROFIT' : 'LOSS'}</div>
         </div>
         <div class="side">
@@ -1393,7 +1443,6 @@
             <h2 style="font-size:clamp(1.7rem,4.5vw,2.4rem);margin-top:6px">${headline(net, busted, quiet)}</h2>
           </div>
           ${state.event ? `<div class="sticky-note"><small>Overnight</small>${state.event}</div>` : ''}
-          ${tipHTML(lessonKey(flags))}
           <button class="btn hot" id="next">${busted || last ? 'See how you did' : 'Next morning'}</button>
         </div>
       </div>`;
@@ -1439,7 +1488,7 @@
     const best = loadBest();
     const isBest = !busted && (!best || state.cash > best.cash);
     if (isBest) saveBest({ cash: Math.round(state.cash), rank });
-    const [lk, lead] = endLesson(s, deadValue);
+    const [, lead] = endLesson(s, deadValue);
     const brag = `Pallet Rip: ${busted ? 'went broke on day ' + state.day : DAYS + ' days'}, $${START_CASH} → ${money(state.cash)}. ${rank}. ${str}% sell-through, ★${state.feedback} feedback.` +
       (s.bestFlip ? ` Best flip: ${s.bestFlip.name} for ${money(s.bestFlip.price)}.` : '') + `\nrobertsdkyle.com/pallet`;
     $('#stage').innerHTML = `
@@ -1459,7 +1508,7 @@
           <div><small>Unsold at the end</small><b>${leftover.length} items, ~${money(deadValue)}</b></div>
           <div><small>Best flip</small><b>${s.bestFlip ? `${s.bestFlip.name}, ${money(s.bestFlip.price)}` : 'Nothing'}</b></div>
         </div>
-        <div><p style="margin:0 0 10px;font-weight:700">${lead}</p>${tipHTML(lk)}</div>
+        <p class="lead-line">${lead}</p>
         <div class="row">
           <button class="btn hot" id="again">Rent the unit again</button>
           <button class="btn ghost" id="brag">Copy my score</button>
