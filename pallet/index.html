@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Pallet Rip</title>
+<meta name="description" content="Buy mystery liquidation pallets, rip them open, and flip the haul on eBay before the rent comes due. Ten days. Six hundred bucks. Good luck.">
+<meta property="og:title" content="Pallet Rip">
+<meta property="og:description" content="Buy mystery liquidation pallets, rip them open, flip the haul. Ten days, $600.">
+<meta property="og:url" content="https://robertsdkyle.com/pallet/">
+<meta name="theme-color" content="#b98f5e">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='4' fill='%23c49a68'/><rect x='14' y='0' width='4' height='32' fill='%23e8d3a2'/><rect x='3' y='26' width='26' height='4' fill='%236b4a2b'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=IBM+Plex+Mono:wght@400;600&family=Permanent+Marker&display=swap">
+<style>
+  /* Layout: one corrugated-cardboard workbench; a sticky shipping-label status bar, then a single stage that swaps auction → rip → receipt. Single deliberate look (warehouse kraft), not themed. */
+  :root {
+    --kraft:      #c49a68;
+    --kraft-dark: #a57b4b;
+    --kraft-line: rgba(90, 58, 26, 0.10);
+    --paper:      #fbf8f1;
+    --paper-edge: #e9e1cf;
+    --ink:        #1f1b16;
+    --ink-soft:   #5b5145;
+    --tape:       rgba(232, 211, 162, 0.92);
+    --sticker:    #e2462c;  /* clearance-sticker red */
+    --forklift:   #f2b705;  /* jackpot / forklift yellow */
+    --gain:       #23743f;
+    --loss:       #b3261e;
+    --shadow:     rgba(55, 33, 12, 0.28);
+
+    --f-marker: 'Permanent Marker', 'Comic Sans MS', 'Marker Felt', cursive;
+    --f-body:   'Archivo', 'Arial Narrow', system-ui, sans-serif;
+    --f-mono:   'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+
+    color-scheme: light;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: var(--f-body);
+    font-size: 16px;
+    line-height: 1.45;
+    color: var(--ink);
+    background-color: var(--kraft);
+    background-image:
+      repeating-linear-gradient(90deg, var(--kraft-line) 0 2px, transparent 2px 9px),
+      radial-gradient(ellipse at 20% 0%, rgba(255,240,210,0.35), transparent 60%);
+  }
+  button { font: inherit; color: inherit; cursor: pointer; }
+  :focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+
+  .wrap { max-width: 1060px; margin: 0 auto; padding-inline: 16px; padding-block: 0 64px; }
+
+  /* ---------- Status bar (shipping label) ---------- */
+  .bar {
+    position: sticky; top: env(safe-area-inset-top, 0px); z-index: 10;
+    margin-inline: -16px; padding: 10px 16px;
+    background: var(--kraft-dark);
+    box-shadow: 0 2px 0 rgba(0,0,0,0.12);
+  }
+  .bar-inner {
+    max-width: 1060px; margin: 0 auto;
+    display: flex; flex-wrap: wrap; align-items: center; gap: 10px 22px;
+  }
+  .logo {
+    font-family: var(--f-marker); font-size: 1.7rem; line-height: 1;
+    transform: rotate(-2deg); color: var(--ink); text-decoration: none; margin-right: auto;
+  }
+  .logo span { color: var(--sticker); }
+  .stat { display: flex; flex-direction: column; line-height: 1.1; }
+  .stat small {
+    font-size: 0.66rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+    color: rgba(31,27,22,0.62);
+  }
+  .stat b { font-family: var(--f-mono); font-size: 1.05rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .stat b.neg { color: var(--loss); }
+  .cash b { font-size: 1.35rem; }
+  .cash.bump b { animation: bump .5s ease; }
+  @keyframes bump { 40% { transform: scale(1.18); } }
+
+  /* ---------- Shared ---------- */
+  h1, h2 { font-family: var(--f-marker); font-weight: 400; line-height: 1.05; margin: 0; text-wrap: balance; }
+  .eyebrow {
+    font-size: 0.72rem; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-soft);
+  }
+  .stage-head { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 12px 24px; margin: 28px 0 18px; }
+  .stage-head h2 { font-size: clamp(1.7rem, 4.5vw, 2.5rem); }
+  .stage-head p { margin: 6px 0 0; max-width: 60ch; color: var(--ink); }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    border: 2px solid var(--ink); background: var(--ink); color: var(--paper);
+    padding: 11px 20px; border-radius: 4px;
+    font-weight: 800; font-stretch: 85%; text-transform: uppercase; letter-spacing: 0.06em; font-size: 0.95rem;
+    box-shadow: 3px 3px 0 var(--shadow);
+    transition: transform .12s ease, box-shadow .12s ease;
+  }
+  .btn:hover { transform: translate(-1px,-1px); box-shadow: 4px 4px 0 var(--shadow); }
+  .btn:active { transform: translate(2px,2px); box-shadow: 1px 1px 0 var(--shadow); }
+  .btn.ghost { background: transparent; color: var(--ink); }
+  .btn.hot { background: var(--sticker); border-color: var(--ink); color: var(--paper); }
+  .btn[disabled] { opacity: 0.45; cursor: not-allowed; transform: none; }
+  .row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+  .note { font-size: 0.9rem; color: var(--ink-soft); }
+
+  /* ---------- Intro ---------- */
+  .intro { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 32px; align-items: center; margin-top: 40px; }
+  .intro h1 { font-size: clamp(3rem, 11vw, 6.4rem); transform: rotate(-3deg); transform-origin: left; }
+  .intro h1 span { color: var(--sticker); }
+  .intro .lede { font-size: 1.15rem; max-width: 46ch; margin: 22px 0; }
+  .rules { list-style: none; margin: 0 0 26px; padding: 0; display: grid; gap: 8px; max-width: 52ch; }
+  .rules li { display: grid; grid-template-columns: 4.5rem 1fr; gap: 10px; }
+  .rules b { font-family: var(--f-mono); font-weight: 600; }
+  .best-line { margin-top: 14px; font-family: var(--f-mono); font-size: 0.85rem; color: var(--ink-soft); }
+
+  /* ---------- Shipping labels (auction lots) ---------- */
+  .lots { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 22px; }
+  .lot {
+    position: relative; background: var(--paper); border: 1px solid var(--paper-edge);
+    padding: 18px 18px 16px; box-shadow: 0 6px 14px var(--shadow);
+    display: flex; flex-direction: column; gap: 12px; min-width: 0;
+  }
+  .lot:nth-child(1) { transform: rotate(-0.8deg); }
+  .lot:nth-child(2) { transform: rotate(0.6deg); }
+  .lot:nth-child(3) { transform: rotate(-0.3deg); }
+  .lot::before { /* tape strip */
+    content: ""; position: absolute; top: -12px; left: 50%; width: 92px; height: 24px;
+    transform: translateX(-50%) rotate(-3deg); background: var(--tape);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.12);
+  }
+  .lot-top { display: flex; justify-content: space-between; align-items: start; gap: 8px; border-bottom: 2px solid var(--ink); padding-bottom: 10px; }
+  .lot-no { font-family: var(--f-mono); font-size: 0.78rem; color: var(--ink-soft); }
+  .lot-src { font-weight: 900; font-stretch: 75%; font-size: 1.35rem; text-transform: uppercase; line-height: 1.05; margin-top: 2px; }
+  .grade {
+    flex: none; width: 52px; height: 52px; border: 3px solid var(--ink); display: grid; place-items: center;
+    font-weight: 900; font-size: 1.9rem; line-height: 1; font-stretch: 75%;
+  }
+  .grade small { display: block; font-size: 0.5rem; letter-spacing: 0.1em; margin-top: -2px; }
+  .lot dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; font-size: 0.92rem; }
+  .lot dt { color: var(--ink-soft); }
+  .lot dd { margin: 0; text-align: right; font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+  .lot dd.unknown { font-family: var(--f-marker); color: var(--sticker); }
+  .barcode {
+    height: 34px;
+    background: repeating-linear-gradient(90deg, var(--ink) 0 2px, transparent 2px 4px, var(--ink) 4px 5px, transparent 5px 8px, var(--ink) 8px 11px, transparent 11px 12px);
+  }
+  .lot-foot { display: flex; align-items: end; justify-content: space-between; gap: 10px; margin-top: auto; }
+  .price { font-family: var(--f-mono); font-weight: 600; font-size: 1.8rem; line-height: 1; font-variant-numeric: tabular-nums; }
+  .price s { display: block; font-size: 0.8rem; color: var(--ink-soft); font-weight: 400; }
+  .lot.cant { filter: grayscale(0.6); }
+  .lot.cant .btn { background: var(--ink-soft); border-color: var(--ink-soft); }
+  .skip-row { margin-top: 26px; }
+
+  /* ---------- The box ---------- */
+  .box-stage { display: grid; place-items: center; padding: 30px 0 10px; }
+  .box {
+    position: relative; width: min(340px, 82vw); aspect-ratio: 1.25; max-width: 100%;
+    background: linear-gradient(180deg, #b98c58, var(--kraft-dark));
+    border: 2px solid rgba(60,38,16,0.45);
+    box-shadow: 0 18px 30px var(--shadow);
+    cursor: pointer;
+    perspective: 700px;
+  }
+  .box .flap {
+    position: absolute; top: -2px; width: 50%; height: 30%;
+    background: linear-gradient(180deg, #d0a774, #b98c58);
+    border: 2px solid rgba(60,38,16,0.45);
+    transition: transform .55s cubic-bezier(.3,1.4,.5,1);
+  }
+  .box .flap.l { left: 0; transform-origin: left top; }
+  .box .flap.r { right: 0; transform-origin: right top; }
+  .box .tape {
+    position: absolute; left: 50%; top: -2px; width: 22%; height: 56%; transform: translateX(-50%);
+    background: var(--tape); box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+    transition: opacity .3s ease .3s;
+  }
+  .box .tape::after { /* the cut */
+    content: ""; position: absolute; left: 50%; top: 0; width: 2px; height: 0; background: var(--ink);
+    transition: height .3s ease;
+  }
+  .box .stencil {
+    position: absolute; left: 0; right: 0; bottom: 14%; text-align: center;
+    font-weight: 900; font-stretch: 62%; letter-spacing: 0.08em; text-transform: uppercase;
+    color: rgba(40,24,8,0.55); font-size: 1.1rem; line-height: 1.2;
+  }
+  .box .stencil b { display: block; font-family: var(--f-marker); font-weight: 400; font-size: 1.7rem; letter-spacing: 0; color: var(--ink); transform: rotate(-3deg); }
+  .box.cut .tape::after { height: 100%; }
+  .box.open .flap.l { transform: rotateZ(-130deg); }
+  .box.open .flap.r { transform: rotateZ(130deg); }
+  .box.open .tape { opacity: 0; }
+  .box.shake { animation: shake .4s ease; }
+  @keyframes shake { 25% { transform: rotate(-2deg); } 75% { transform: rotate(2deg); } }
+
+  /* ---------- Item tags ---------- */
+  .haul-bar {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 20px;
+    background: var(--ink); color: var(--paper); padding: 12px 16px; margin-bottom: 18px;
+    box-shadow: 3px 3px 0 var(--shadow);
+  }
+  .haul-bar .slots { display: flex; gap: 6px; }
+  .haul-bar .slot { width: 22px; height: 22px; border: 2px solid var(--paper); border-radius: 3px; }
+  .haul-bar .slot.on { background: var(--forklift); border-color: var(--forklift); }
+  .haul-bar .proj { font-family: var(--f-mono); font-size: 0.9rem; font-variant-numeric: tabular-nums; }
+  .haul-bar .proj b { color: var(--forklift); font-weight: 600; }
+  .haul-bar .row { gap: 10px; }
+  .haul-bar .btn { box-shadow: none; }
+  .haul-bar .btn.ghost { color: var(--paper); border-color: var(--paper); }
+
+  .tags { display: grid; grid-template-columns: repeat(auto-fill, minmax(156px, 1fr)); gap: 16px; }
+  .tag {
+    position: relative; text-align: left; min-width: 0;
+    background: var(--paper); border: 1px solid var(--paper-edge); border-radius: 6px 6px 3px 3px;
+    padding: 26px 12px 12px; box-shadow: 0 4px 10px var(--shadow);
+    display: flex; flex-direction: column; gap: 6px;
+    transition: transform .15s ease, box-shadow .15s ease;
+    animation: pop .45s cubic-bezier(.3,1.5,.5,1) backwards;
+  }
+  .tag::before { /* hang-tag hole */
+    content: ""; position: absolute; top: 9px; left: 50%; width: 10px; height: 10px; margin-left: -5px;
+    border-radius: 50%; background: var(--kraft); box-shadow: inset 0 1px 2px rgba(0,0,0,0.35);
+  }
+  @keyframes pop { from { opacity: 0; transform: translateY(-40px) rotate(-8deg) scale(.7); } }
+  .tag:hover { transform: translateY(-3px) rotate(-0.6deg); box-shadow: 0 8px 16px var(--shadow); }
+  .tag .ico { font-size: 2.1rem; line-height: 1; }
+  .tag .nm { font-weight: 700; font-stretch: 85%; line-height: 1.15; font-size: 0.98rem; }
+  .tag .vals { margin-top: auto; display: grid; gap: 1px; font-family: var(--f-mono); font-size: 0.78rem; font-variant-numeric: tabular-nums; color: var(--ink-soft); }
+  .tag .vals b { color: var(--ink); font-weight: 600; }
+  .cond {
+    align-self: start; font-size: 0.66rem; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase;
+    border: 2px solid currentColor; padding: 1px 6px; transform: rotate(-3deg);
+  }
+  .cond.NEW { color: var(--gain); }
+  .cond.OPEN { color: var(--ink-soft); }
+  .cond.UNTESTED { color: #b86a00; }
+  .cond.BROKEN { color: var(--loss); }
+  .tag.jackpot { border: 3px solid var(--forklift); box-shadow: 0 0 0 3px var(--ink), 0 8px 22px rgba(242,183,5,0.55); }
+  .tag.jackpot::after {
+    content: "JACKPOT"; position: absolute; top: -10px; right: -8px;
+    background: var(--forklift); color: var(--ink); font-weight: 900; font-size: 0.7rem; letter-spacing: 0.12em;
+    padding: 3px 7px; transform: rotate(8deg); border: 2px solid var(--ink);
+  }
+  .tag.listed { transform: rotate(-1.5deg) translateY(-4px); outline: 3px solid var(--ink); outline-offset: -1px; }
+  .tag .listed-sticker {
+    position: absolute; right: 8px; top: 30px; display: none;
+    width: 54px; height: 54px; border-radius: 50%; background: var(--sticker); color: var(--paper);
+    font-weight: 900; font-stretch: 75%; font-size: 0.72rem; line-height: 1; text-transform: uppercase;
+    place-items: center; text-align: center; transform: rotate(12deg); box-shadow: 0 2px 4px var(--shadow);
+  }
+  .tag.listed .listed-sticker { display: grid; }
+  .tags.locked .tag { cursor: default; }
+
+  /* ---------- Receipt ---------- */
+  .ledger-wrap { display: grid; grid-template-columns: minmax(0, 420px) minmax(0, 1fr); gap: 32px; align-items: start; margin-top: 28px; }
+  .receipt {
+    position: relative; background: var(--paper); padding: 22px 20px 30px;
+    font-family: var(--f-mono); font-size: 0.86rem; font-variant-numeric: tabular-nums;
+    box-shadow: 0 10px 22px var(--shadow);
+    --zig: linear-gradient(135deg, var(--paper) 50%, transparent 50%) 0 0 / 12px 12px repeat-x,
+           linear-gradient(225deg, var(--paper) 50%, transparent 50%) 0 0 / 12px 12px repeat-x;
+  }
+  .receipt::after {
+    content: ""; position: absolute; left: 0; right: 0; bottom: -12px; height: 12px;
+    background: var(--zig);
+  }
+  .receipt h3 { margin: 0 0 2px; text-align: center; font-family: var(--f-body); font-weight: 900; font-stretch: 70%; font-size: 1.4rem; letter-spacing: 0.06em; }
+  .receipt .sub { text-align: center; color: var(--ink-soft); margin-bottom: 14px; }
+  .receipt .ln { display: flex; justify-content: space-between; gap: 12px; padding: 2px 0; animation: print .25s ease both; }
+  .receipt .ln span:first-child { min-width: 0; overflow-wrap: anywhere; }
+  .receipt .ln span:last-child { flex: none; }
+  .receipt .ln.dim { color: var(--ink-soft); padding-left: 1.2em; font-size: 0.8rem; }
+  .receipt .ln.neg span:last-child { color: var(--loss); }
+  .receipt .ln.pos span:last-child { color: var(--gain); }
+  .receipt .rule { border-top: 2px dashed var(--ink-soft); margin: 10px 0; }
+  .receipt .ln.big { font-weight: 600; font-size: 1.05rem; }
+  @keyframes print { from { opacity: 0; transform: translateY(-4px); } }
+  .stamp {
+    position: absolute; right: 18px; bottom: 78px;
+    font-family: var(--f-body); font-weight: 900; font-stretch: 70%; font-size: 1.7rem; letter-spacing: 0.08em;
+    padding: 2px 10px; border: 4px solid currentColor; border-radius: 6px; transform: rotate(-14deg);
+    opacity: 0.85; mix-blend-mode: multiply;
+    animation: slam .35s cubic-bezier(.3,1.6,.5,1) .5s backwards;
+  }
+  .stamp.pos { color: var(--gain); }
+  .stamp.neg { color: var(--loss); }
+  @keyframes slam { from { opacity: 0; transform: rotate(-14deg) scale(2.2); } }
+
+  .sticky-note {
+    background: #fff27a; color: var(--ink); padding: 18px 18px 20px; max-width: 360px;
+    transform: rotate(1.5deg); box-shadow: 0 8px 16px var(--shadow);
+    font-family: var(--f-marker); font-size: 1.15rem; line-height: 1.35;
+  }
+  .sticky-note small { display: block; font-family: var(--f-body); font-weight: 800; font-size: 0.7rem; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 6px; color: var(--ink-soft); }
+  .side { display: grid; gap: 22px; justify-items: start; }
+
+  /* ---------- End ---------- */
+  .end { text-align: left; margin-top: 36px; display: grid; gap: 22px; }
+  .end h1 { font-size: clamp(2.6rem, 9vw, 5rem); transform: rotate(-2deg); transform-origin: left; }
+  .rank {
+    display: inline-block; font-weight: 900; font-stretch: 70%; text-transform: uppercase; letter-spacing: 0.06em;
+    font-size: clamp(1.4rem, 4vw, 2rem); background: var(--sticker); color: var(--paper);
+    padding: 6px 16px; transform: rotate(-1.5deg); box-shadow: 4px 4px 0 var(--ink);
+  }
+  .end-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; max-width: 760px; }
+  .end-stats div { background: var(--paper); padding: 12px 14px; box-shadow: 0 3px 8px var(--shadow); min-width: 0; }
+  .end-stats small { display: block; font-size: 0.68rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-soft); }
+  .end-stats b { font-family: var(--f-mono); font-size: 1.1rem; font-weight: 600; overflow-wrap: anywhere; }
+  .copy-out { font-family: var(--f-mono); font-size: 0.8rem; background: var(--paper); padding: 10px 12px; max-width: 760px; white-space: pre-wrap; display: none; }
+  .copy-out.show { display: block; }
+
+  .credit { margin-top: 48px; font-size: 0.85rem; color: var(--ink-soft); }
+  .credit a { color: var(--ink); }
+
+  @media (max-width: 720px) {
+    .intro, .ledger-wrap { grid-template-columns: minmax(0, 1fr); }
+    .intro .box-stage { order: -1; padding-top: 10px; }
+    .tags { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+    .bar-inner { gap: 6px 16px; }
+    .logo { font-size: 1.4rem; width: 100%; }
+    .stamp { font-size: 1.3rem; bottom: 74px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; animation-delay: 0ms !important; transition-duration: 0.01ms !important; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="bar" aria-label="Game status">
+    <div class="bar-inner" id="bar">
+      <a class="logo" href="#" id="logo">Pallet <span>Rip</span></a>
+    </div>
+  </header>
+  <main id="stage" aria-live="polite"></main>
+  <p class="credit">Made for fun by <a href="https://robertsdkyle.com/">Kyle D. Roberts</a>, who has actually opened a lot of these. Real pallets: <a href="https://www.youtube.com/@LongIslandLiquidation" target="_blank" rel="noopener">Long Island Liquidation</a>.</p>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* =========================================================
+     TUNING
+     ========================================================= */
+  const START_CASH = 600, DAYS = 10, RENT = 40, BASE_SLOTS = 4;
+  const EBAY_FEE = 0.1325, EBAY_ORDER_FEE = 0.30, PACKING = 3;
+  const DOA_RATE = 0.3;      // untested items that turn out dead
+  const YARD_RATE = 0.35;    // dollar-table price as a share of low value
+
+  const COND = {
+    NEW:      { label: 'New',        mult: 1.00 },
+    OPEN:     { label: 'Open box',   mult: 0.75 },
+    UNTESTED: { label: 'Untested',   mult: 0.75 },
+    BROKEN:   { label: 'For parts',  mult: 0.12 }
+  };
+
+  const GRADES = {
+    A: { name: 'Shelf pulls', sources: ['Target Overstock', 'Walmart Shelf Pulls', 'Costco Excess'],
+         cond: [['NEW', 60], ['OPEN', 35], ['UNTESTED', 5]],
+         tier: [['dud', 15], ['common', 57], ['good', 25], ['jackpot', 3]],
+         factor: [0.72, 0.95], manifest: true },
+    B: { name: 'Customer returns', sources: ['Amazon Returns', 'Home Depot Returns', 'Best Buy Returns'],
+         cond: [['NEW', 20], ['OPEN', 35], ['UNTESTED', 35], ['BROKEN', 10]],
+         tier: [['dud', 32], ['common', 45], ['good', 20], ['jackpot', 3]],
+         factor: [0.58, 1.02], manifest: true },
+    C: { name: 'Salvage', sources: ['Unmanifested Truckload', 'Freight Claims', 'Mystery Salvage'],
+         cond: [['NEW', 8], ['OPEN', 22], ['UNTESTED', 42], ['BROKEN', 28]],
+         tier: [['dud', 42], ['common', 33], ['good', 19], ['jackpot', 6]],
+         factor: [0.42, 1.05], manifest: false }
+  };
+
+  const SIZES = {
+    S: { name: 'Half pallet',  n: [6, 9] },
+    M: { name: 'Full pallet',  n: [10, 14] },
+    L: { name: 'Gaylord box',  n: [15, 20] }
+  };
+
+  // [icon, name, low, high]
+  const CATALOG = {
+    'Electronics': {
+      dud:     [['🎧','Single AirPod (left)',8,15],['📱','iPhone 6 cases, lot of 47',3,10],['🔌','Tangle of USB-C cables',4,12],['📺','TV remote, brand unknown',2,6],['🖱️','Wireless mouse, no dongle',3,8]],
+      common:  [['🔊','JBL Flip 5 speaker',45,70],['⌚','Fitbit Inspire 3',40,60],['🎮','Xbox wireless controller',30,45],['💡','Smart bulb 4-pack',20,35],['🔔','Ring video doorbell',50,80],['🎙️','USB podcast mic',35,55]],
+      good:    [['🎧','Bose QC45 headphones',140,200],['📱','iPad 9th gen',180,240],['🖥️','27-inch 4K monitor',150,220],['🚁','DJI Mini drone',200,300]],
+      jackpot: [['💻','MacBook Air M2',600,800],['📸','Sony a6400 camera body',500,650],['🥽','Meta Quest 3',350,450],['🎮','Nintendo Switch OLED',260,320]]
+    },
+    'Home & Kitchen': {
+      dud:     [['🫙','Mismatched Tupperware lids',1,4],['🕯️','Pumpkin spice candle',2,6],['🪴','Fake succulent, sun-faded',1,4],['🛁','Shower curtain, opened',3,8],['🧽','Sponges. So many sponges.',2,6]],
+      common:  [['🍳','5-qt air fryer',40,65],['☕','Keurig K-Mini',35,55],['🔪','Knife block set',30,50],['🛏️','Queen sheet set',20,35],['🧹','Shark handheld vac',50,75],['🍲','Instant Pot Duo',55,80]],
+      good:    [['🤖','Roomba i3',150,220],['☕','Nespresso Vertuo',100,150],['🥤','Vitamix blender',180,260],['🍦','Ninja Creami',120,160]],
+      jackpot: [['🌀','Dyson V15 Detect',380,520],['🎂','KitchenAid Artisan mixer',220,320],['☕','Breville Barista Express',400,550]]
+    },
+    'Toys & Games': {
+      dud:     [['🧸','Plush with one eye',1,3],['🧩','Puzzle, 999 of 1,000 pieces',1,4],['🌀','Fidget spinners, lot of 60',5,12],['🎲','Board game, no box',2,6],['🪀','Yo-yo, hopelessly tangled',1,3]],
+      common:  [['🏎️','Hot Wheels track set',20,35],['🎲','Catan',25,40],['🐸','Squishmallow, 16-inch',15,30],['🧱','LEGO City set',25,45],['🎯','Nerf blaster',20,35]],
+      good:    [['🧱','LEGO Technic Porsche',120,170],['🃏','Pokémon booster box',110,160],['🛴','Kids electric scooter',90,140]],
+      jackpot: [['🛸','LEGO UCS Millennium Falcon',650,850],['🔥','PSA 9 Charizard card',300,500],['🏰','LEGO Hogwarts Castle',330,420]]
+    },
+    'Tools': {
+      dud:     [['🔩','Bag of assorted screws',2,5],['🪛','Screwdriver, missing tip',1,3],['🧤','Work gloves, all left hand',1,4],['📏','Tape measure, won\'t retract',1,3]],
+      common:  [['🔦','Rechargeable work light',20,35],['🪚','Ryobi circular saw',40,60],['🧰','120-piece socket set',35,55],['🔋','DeWalt 20V battery',45,70]],
+      good:    [['🛠️','Milwaukee M18 impact driver',110,150],['💨','Pancake air compressor',80,120],['🔨','Makita rotary hammer',140,200]],
+      jackpot: [['🧰','DeWalt 6-tool combo kit',380,520],['🌿','EGO 56V lawn mower',350,450],['⚡','Portable generator',500,700]]
+    }
+  };
+  const CATS = Object.keys(CATALOG);
+  const LOT_CATS = CATS.concat(['General merch']);
+
+  const EVENTS = [
+    { w: 3, text: 'Your unboxing short hit 412K views. eBay sales run 25% higher tomorrow.', apply: s => { s.mods.hype = 1.25; } },
+    { w: 3, text: 'Buyer says the item "smelled weird." eBay sided with the buyer.', cash: -35 },
+    { w: 2, text: 'Neighbor bought everything left on the dollar table for a flat $60.', cash: 60 },
+    { w: 2, text: 'Found a folded $20 inside a returned purse.', cash: 20 },
+    { w: 2, text: 'Your cousin starts shooting listing photos for you. One more eBay slot, for good.', ok: s => s.slots < BASE_SLOTS + 2, apply: s => { s.slots += 1; } },
+    { w: 2, text: 'Rain all weekend. Tomorrow\'s yard sale pays half.', apply: s => { s.mods.yard = 0.5; } },
+    { w: 2, text: 'eBay raised promoted-listing rates. Fees are 16% tomorrow.', apply: s => { s.mods.fee = 0.16; } },
+    { w: 2, text: 'Forklift rental ran long.', cash: -25 },
+    { w: 2, text: 'A broker you know offers first dibs. Tomorrow\'s lots are 15% off.', apply: s => { s.mods.discount = 0.85; } }
+  ];
+
+  const RANKS = [
+    [-Infinity, 'Repo\'d'],
+    [1, 'Garage Hoarder'],
+    [600, 'Weekend Flipper'],
+    [900, 'Power Seller'],
+    [1400, 'Top Rated Plus'],
+    [2200, 'Liquidation Kingpin']
+  ];
+
+  /* =========================================================
+     HELPERS
+     ========================================================= */
+  const $ = sel => document.querySelector(sel);
+  const rand = (a, b) => a + Math.random() * (b - a);
+  const randi = (a, b) => Math.floor(rand(a, b + 1));
+  const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+  const weighted = pairs => {
+    let t = pairs.reduce((s, p) => s + p[1], 0), r = Math.random() * t;
+    for (const p of pairs) { if ((r -= p[1]) < 0) return p[0]; }
+    return pairs[pairs.length - 1][0];
+  };
+  const money = (n, cents) => {
+    const sign = n < 0 ? '−' : '';
+    const v = Math.abs(n);
+    return sign + '$' + (cents ? v.toFixed(2) : Math.round(v).toLocaleString('en-US'));
+  };
+  const signed = n => (n >= 0 ? '+' : '') + money(n);
+  const round5 = n => Math.max(5, Math.round(n / 5) * 5);
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const wait = ms => new Promise(r => setTimeout(r, reduced ? 0 : ms));
+
+  /* =========================================================
+     ECONOMY
+     ========================================================= */
+  let uid = 0;
+  function makeItem(cat, grade) {
+    const c = cat === 'General merch' ? pick(CATS) : cat;
+    const tier = weighted(GRADES[grade].tier);
+    const [icon, name, low, high] = pick(CATALOG[c][tier]);
+    const cond = weighted(GRADES[grade].cond);
+    return { id: ++uid, icon, name, low, high, tier, cond };
+  }
+  function makeItems(cat, grade, size) {
+    const n = randi(...SIZES[size].n), out = [];
+    for (let i = 0; i < n; i++) out.push(makeItem(cat, grade));
+    return out;
+  }
+  const valRange = it => [it.low * COND[it.cond].mult, it.high * COND[it.cond].mult];
+  const yardValue = (it, mult = 1) => Math.max(1, Math.round(it.low * COND[it.cond].mult * YARD_RATE * mult));
+  function ebayExpected(it, fee = EBAY_FEE) {
+    const [lo, hi] = valRange(it), mid = (lo + hi) / 2;
+    const gross = it.cond === 'UNTESTED' ? (1 - DOA_RATE) * mid + DOA_RATE * it.low * 0.15 : mid;
+    return gross * (1 - fee) - EBAY_ORDER_FEE - PACKING;
+  }
+  // Best-play value of a set of items given N listing slots.
+  function bestValue(items, slots) {
+    const gains = items.map(it => ebayExpected(it) - yardValue(it)).sort((a, b) => b - a);
+    const yard = items.reduce((s, it) => s + yardValue(it), 0);
+    return yard + gains.slice(0, slots).filter(g => g > 0).reduce((s, g) => s + g, 0);
+  }
+  // Lots are priced off what this *kind* of lot usually holds, not what this one holds.
+  // That's what makes a jackpot a jackpot.
+  function expectedValue(cat, grade, size, slots) {
+    let sum = 0, runs = 60;
+    for (let i = 0; i < runs; i++) sum += bestValue(makeItems(cat, grade, size), slots);
+    return sum / runs;
+  }
+  function makeLot(forceSize) {
+    const grade = weighted([['A', 3], ['B', 5], ['C', 3]]);
+    const size = forceSize || weighted([['S', 4], ['M', 4 + state.day * 0.4], ['L', 1 + state.day * 0.5]]);
+    const cat = pick(LOT_CATS);
+    const items = makeItems(cat, grade, size);
+    const g = GRADES[grade];
+    const base = expectedValue(cat, grade, size, state.slots) * rand(...g.factor);
+    const list = round5(base);
+    const price = round5(base * (state.mods.discount || 1));
+    const msrp = g.manifest ? Math.round(items.reduce((s, it) => s + it.high, 0) * 1.9 * rand(0.85, 1.2) / 10) * 10 : null;
+    return {
+      no: randi(1000, 9999) + '-' + 'ABCDEFGHJKLMNPQRSTUVWXYZ'[randi(0, 23)],
+      grade, size, cat, items, list, price, msrp,
+      source: pick(g.sources), units: items.length
+    };
+  }
+
+  /* =========================================================
+     STATE
+     ========================================================= */
+  let state;
+  function freshState() {
+    return {
+      phase: 'intro', day: 1, cash: START_CASH, slots: BASE_SLOTS,
+      mods: {}, nextMods: {}, lots: [], lot: null, listed: [], ledger: null, event: null,
+      stats: { spent: 0, revenue: 0, pallets: 0, jackpots: 0, doa: 0, bestFlip: null, worstLot: null, bestLot: null }
+    };
+  }
+  function loadBest() { try { return JSON.parse(localStorage.getItem('palletrip.best') || 'null'); } catch (e) { return null; } }
+  function saveBest(v) { try { localStorage.setItem('palletrip.best', JSON.stringify(v)); } catch (e) {} }
+
+  /* =========================================================
+     RENDER: STATUS BAR
+     ========================================================= */
+  function renderBar(bump) {
+    const bar = $('#bar');
+    const logo = bar.querySelector('.logo');
+    bar.innerHTML = '';
+    bar.appendChild(logo);
+    if (state.phase === 'intro') return;
+    const stats = [
+      ['Day', `${Math.min(state.day, DAYS)}/${DAYS}`, ''],
+      ['Cash', money(state.cash), 'cash' + (bump ? ' bump' : '')],
+      ['eBay slots', String(state.slots), ''],
+      ['Rent', money(RENT) + '/day', '']
+    ];
+    for (const [k, v, cls] of stats) {
+      const d = document.createElement('div');
+      d.className = 'stat ' + cls;
+      d.innerHTML = `<small>${k}</small><b class="${k === 'Cash' && state.cash < 0 ? 'neg' : ''}">${v}</b>`;
+      bar.appendChild(d);
+    }
+  }
+
+  /* =========================================================
+     PHASES
+     ========================================================= */
+  function render() {
+    renderBar();
+    const fn = { intro: renderIntro, auction: renderAuction, rip: renderRip, ledger: renderLedger, end: renderEnd }[state.phase];
+    fn();
+    window.scrollTo({ top: 0, behavior: reduced ? 'auto' : 'smooth' });
+  }
+
+  function boxHTML(top, big) {
+    return `<div class="box" id="box" role="button" tabindex="0" aria-label="Cut the tape">
+      <div class="flap l"></div><div class="flap r"></div><div class="tape"></div>
+      <div class="stencil">${top}<b>${big}</b></div>
+    </div>`;
+  }
+
+  function renderIntro() {
+    const best = loadBest();
+    $('#stage').innerHTML = `
+      <section class="intro">
+        <div>
+          <h1>Pallet <span>Rip</span></h1>
+          <p class="lede">You have $600, a rented warehouse bay, and ten days. Buy mystery liquidation pallets, cut the tape, and flip what's inside before the rent eats you alive.</p>
+          <ul class="rules">
+            <li><b>Bid</b><span>Three lots a day. The manifest MSRP is a hint, and it lies. Salvage lots don't come with one at all.</span></li>
+            <li><b>Rip</b><span>Every lot is random. Most of it is junk. Some of it is a Dyson.</span></li>
+            <li><b>List</b><span>You can only list ${BASE_SLOTS} things on eBay a day. Everything else hits the dollar table.</span></li>
+            <li><b>Risk</b><span>Untested items die on arrival ${Math.round(DOA_RATE * 100)}% of the time.</span></li>
+          </ul>
+          <div class="row"><button class="btn hot" id="start">Open the warehouse</button></div>
+          ${best ? `<p class="best-line">Your best: ${money(best.cash)} · ${best.rank}</p>` : ''}
+        </div>
+        <div class="box-stage">${boxHTML('Fragile · This side up', 'Lot #0001')}</div>
+      </section>`;
+    $('#start').onclick = startGame;
+    const box = $('#box');
+    const wiggle = () => { box.classList.remove('shake'); void box.offsetWidth; box.classList.add('shake'); };
+    box.onclick = wiggle;
+    box.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); wiggle(); } };
+  }
+
+  function startGame() {
+    state = freshState();
+    newDay();
+  }
+
+  function newDay() {
+    state.mods = state.nextMods; state.nextMods = {};
+    state.phase = 'auction';
+    state.lots = [makeLot('S'), makeLot(), makeLot()].sort(() => Math.random() - 0.5);
+    state.lot = null; state.listed = []; state.ledger = null; state.event = null;
+    render();
+  }
+
+  function renderAuction() {
+    const m = state.mods;
+    const notes = [];
+    if (m.hype) notes.push('Your video is still blowing up: eBay sales +25% today.');
+    if (m.yard) notes.push('Rain in the forecast: the yard sale pays half today.');
+    if (m.fee) notes.push('eBay fees are 16% today.');
+    if (m.discount) notes.push('Broker discount: 15% off every lot today.');
+    const lotsHTML = state.lots.map((l, i) => {
+      const can = l.price <= state.cash;
+      return `
+      <article class="lot ${can ? '' : 'cant'}">
+        <div class="lot-top">
+          <div>
+            <div class="lot-no">LOT #${l.no}</div>
+            <div class="lot-src">${l.source}</div>
+          </div>
+          <div class="grade" title="Grade ${l.grade}: ${GRADES[l.grade].name}">${l.grade}<small>GRADE</small></div>
+        </div>
+        <dl>
+          <dt>Type</dt><dd>${SIZES[l.size].name}</dd>
+          <dt>Category</dt><dd>${l.cat}</dd>
+          <dt>Condition</dt><dd>${GRADES[l.grade].name}</dd>
+          <dt>Units</dt><dd>${l.grade === 'C' ? '~' + (l.units + randi(-2, 2)) : l.units}</dd>
+          <dt>Manifest MSRP</dt>${l.msrp ? `<dd>${money(l.msrp)}</dd>` : `<dd class="unknown">???</dd>`}
+        </dl>
+        <div class="barcode" aria-hidden="true"></div>
+        <div class="lot-foot">
+          <div class="price">${l.price !== l.list ? `<s>${money(l.list)}</s>` : ''}${money(l.price)}</div>
+          <button class="btn ${can ? 'hot' : ''}" data-buy="${i}" ${can ? '' : 'disabled'}>${can ? 'Buy it' : 'Too rich'}</button>
+        </div>
+      </article>`;
+    }).join('');
+    $('#stage').innerHTML = `
+      <div class="stage-head">
+        <div>
+          <div class="eyebrow">Day ${state.day} · Morning auction</div>
+          <h2>${state.day === DAYS ? 'Last truck of the week.' : pick(['Fresh off the truck.', 'Three lots on the dock.', 'What are we feeling today?', 'The broker is calling.'])}</h2>
+          ${notes.length ? `<p>${notes.join(' ')}</p>` : `<p>Pick one lot, or sit today out. Rent's due either way.</p>`}
+        </div>
+      </div>
+      <div class="lots">${lotsHTML}</div>
+      <div class="row skip-row"><button class="btn ghost" id="skip">Sit today out (−${money(RENT)} rent)</button></div>`;
+    document.querySelectorAll('[data-buy]').forEach(b => b.onclick = () => buy(+b.dataset.buy));
+    $('#skip').onclick = () => settle(true);
+  }
+
+  function buy(i) {
+    const l = state.lots[i];
+    if (l.price > state.cash) return;
+    state.cash -= l.price;
+    state.stats.spent += l.price;
+    state.stats.pallets += 1;
+    state.lot = l;
+    state.phase = 'rip';
+    state.opened = false;
+    renderBar(true);
+    render();
+  }
+
+  function renderRip() {
+    const l = state.lot;
+    $('#stage').innerHTML = `
+      <div class="stage-head">
+        <div>
+          <div class="eyebrow">Day ${state.day} · Lot #${l.no} · Paid ${money(l.price)}</div>
+          <h2 id="rip-h">${state.opened ? 'Here\'s the haul.' : 'Cut the tape.'}</h2>
+          <p id="rip-p">${state.opened ? 'Tap items to list them on eBay. Everything else goes on the dollar table.' : `${SIZES[l.size].name} from ${l.source}. ${l.msrp ? 'Manifest says ' + money(l.msrp) + ' retail.' : 'No manifest. Nobody knows what\'s in here.'}`}</p>
+        </div>
+      </div>
+      <div id="rip-body">${state.opened ? '' : `<div class="box-stage">${boxHTML(l.source, '#' + l.no)}</div>`}</div>`;
+    if (state.opened) { renderHaul(false); return; }
+    const box = $('#box');
+    const go = () => openBox(box);
+    box.onclick = go;
+    box.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } };
+    box.focus({ preventScroll: true });
+  }
+
+  async function openBox(box) {
+    if (box.classList.contains('cut')) return;
+    box.classList.add('cut');
+    await wait(320);
+    box.classList.add('open');
+    await wait(520);
+    state.opened = true;
+    const jp = state.lot.items.filter(i => i.tier === 'jackpot').length;
+    state.stats.jackpots += jp;
+    $('#rip-h').textContent = jp ? 'Oh. OH.' : pick(['Here\'s the haul.', 'Let\'s see what we got.', 'Could be worse.', 'Smells like a warehouse.']);
+    $('#rip-p').textContent = 'Tap items to list them on eBay. Everything else goes on the dollar table.';
+    renderHaul(true);
+  }
+
+  function projection() {
+    const fee = state.mods.fee || EBAY_FEE, hype = state.mods.hype || 1, ym = state.mods.yard || 1;
+    let lo = 0, hi = 0;
+    for (const it of state.lot.items) {
+      if (state.listed.includes(it.id)) {
+        const [a, b] = valRange(it);
+        const worst = it.cond === 'UNTESTED' ? it.low * 0.15 : a;
+        lo += worst * hype * (1 - fee) - EBAY_ORDER_FEE - PACKING;
+        hi += b * hype * (1 - fee) - EBAY_ORDER_FEE - PACKING;
+      } else {
+        const y = yardValue(it, ym); lo += y; hi += y;
+      }
+    }
+    return [lo, hi];
+  }
+
+  function renderHaul(animate) {
+    const l = state.lot;
+    const ym = state.mods.yard || 1;
+    const sorted = l.items.slice();
+    const tags = sorted.map((it, idx) => {
+      const [a, b] = valRange(it);
+      const on = state.listed.includes(it.id);
+      return `<button class="tag ${it.tier === 'jackpot' ? 'jackpot' : ''} ${on ? 'listed' : ''}" data-id="${it.id}" aria-pressed="${on}"
+          style="${animate ? `animation-delay:${idx * 90}ms` : 'animation:none'}">
+        <span class="listed-sticker">Listed on eBay</span>
+        <span class="ico" aria-hidden="true">${it.icon}</span>
+        <span class="nm">${it.name}</span>
+        <span class="cond ${it.cond}">${COND[it.cond].label}</span>
+        <span class="vals">
+          <span>eBay <b>${money(a)}–${money(b)}</b>${it.cond === 'UNTESTED' ? '*' : ''}</span>
+          <span>Yard <b>${money(yardValue(it, ym))}</b></span>
+        </span>
+      </button>`;
+    }).join('');
+    $('#rip-body').innerHTML = `
+      <div class="haul-bar">
+        <div class="row">
+          <div class="slots" id="slots" aria-label="eBay listing slots"></div>
+          <div class="proj" id="proj"></div>
+        </div>
+        <div class="row">
+          <button class="btn ghost" id="auto">Pick for me</button>
+          <button class="btn hot" id="ship">Ship it</button>
+        </div>
+      </div>
+      <div class="tags" id="tags">${tags}</div>
+      ${l.items.some(i => i.cond === 'UNTESTED') ? `<p class="note">* Untested: price shown if it works. ${Math.round(DOA_RATE * 100)}% arrive dead and sell for parts.</p>` : ''}`;
+    document.querySelectorAll('.tag').forEach(t => t.onclick = () => toggle(+t.dataset.id));
+    $('#auto').onclick = autoPick;
+    $('#ship').onclick = () => settle(false);
+    updateHaul();
+  }
+
+  function toggle(id) {
+    const i = state.listed.indexOf(id);
+    if (i >= 0) state.listed.splice(i, 1);
+    else if (state.listed.length < state.slots) state.listed.push(id);
+    else { state.listed.shift(); state.listed.push(id); }
+    updateHaul();
+  }
+
+  function autoPick() {
+    const ranked = state.lot.items
+      .map(it => ({ id: it.id, g: ebayExpected(it, state.mods.fee || EBAY_FEE) - yardValue(it, state.mods.yard || 1) }))
+      .filter(x => x.g > 0).sort((a, b) => b.g - a.g);
+    state.listed = ranked.slice(0, state.slots).map(x => x.id);
+    updateHaul();
+  }
+
+  function updateHaul() {
+    document.querySelectorAll('.tag').forEach(t => {
+      const on = state.listed.includes(+t.dataset.id);
+      t.classList.toggle('listed', on);
+      t.setAttribute('aria-pressed', on);
+    });
+    $('#slots').innerHTML = Array.from({ length: state.slots }, (_, i) => `<span class="slot ${i < state.listed.length ? 'on' : ''}"></span>`).join('');
+    const [lo, hi] = projection();
+    $('#proj').innerHTML = `${state.listed.length}/${state.slots} listed · Projected <b>${money(lo)}–${money(hi)}</b>`;
+  }
+
+  /* =========================================================
+     SETTLE THE DAY
+     ========================================================= */
+  function settle(skipped) {
+    const fee = state.mods.fee || EBAY_FEE, hype = state.mods.hype || 1, ym = state.mods.yard || 1;
+    const lines = [];
+    let net = 0;
+    if (!skipped) {
+      const l = state.lot;
+      lines.push({ t: `Lot #${l.no}, ${l.source}`, v: -l.price });
+      net -= l.price;
+      let fees = 0, yard = 0, yardN = 0, gross = 0;
+      for (const it of l.items) {
+        if (state.listed.includes(it.id)) {
+          const [a, b] = valRange(it);
+          let price, dead = false;
+          if (it.cond === 'UNTESTED' && Math.random() < DOA_RATE) { price = it.low * rand(0.1, 0.2); dead = true; state.stats.doa += 1; }
+          else price = rand(a, b) * hype;
+          price = Math.max(1, Math.round(price * 100) / 100);
+          const f = price * fee + EBAY_ORDER_FEE + PACKING;
+          fees += f; gross += price;
+          lines.push({ t: (dead ? 'DOA, sold for parts: ' : 'eBay: ') + it.name, v: price, cents: true, cls: dead ? 'neg-name' : '' });
+          const best = state.stats.bestFlip;
+          if (!dead && (!best || price > best.price)) state.stats.bestFlip = { name: it.name, price };
+        } else {
+          yard += yardValue(it, ym); yardN += 1;
+        }
+      }
+      if (fees) lines.push({ t: `eBay fees ${Math.round(fee * 10000) / 100}% + $0.30, packing`, v: -fees, cents: true, dim: true });
+      if (yardN) lines.push({ t: `Dollar table (${yardN} item${yardN > 1 ? 's' : ''})`, v: yard });
+      const take = gross - fees + yard;
+      net += take;
+      state.stats.revenue += take;
+      const lotNet = take - l.price;
+      if (!state.stats.bestLot || lotNet > state.stats.bestLot.net) state.stats.bestLot = { name: l.source, net: lotNet };
+      if (!state.stats.worstLot || lotNet < state.stats.worstLot.net) state.stats.worstLot = { name: l.source, net: lotNet };
+    }
+    lines.push({ t: 'Warehouse rent', v: -RENT });
+    net -= RENT;
+
+    // Overnight event
+    let event = null;
+    if (state.day < DAYS && Math.random() < 0.55) {
+      const pool = EVENTS.filter(e => !e.ok || e.ok(state));
+      event = weighted(pool.map(e => [e, e.w]));
+      if (event.apply) {
+        const tmp = { mods: state.nextMods, slots: state.slots };
+        event.apply(tmp);
+        state.nextMods = tmp.mods; state.slots = tmp.slots;
+      }
+      if (event.cash) { lines.push({ t: event.cash > 0 ? 'Lucky break' : 'Bad break', v: event.cash }); net += event.cash; }
+    }
+
+    // Pallet cost was already deducted at purchase; add back everything else.
+    state.cash += net + (skipped ? 0 : state.lot.price);
+    state.ledger = { lines, net, skipped };
+    state.event = event;
+    state.phase = 'ledger';
+    renderBar(true);
+    render();
+    renderBar(true);
+  }
+
+  function renderLedger() {
+    const { lines, net, skipped } = state.ledger;
+    const body = lines.map((ln, i) => {
+      const cls = ln.dim ? 'dim' : (ln.v < 0 ? 'neg' : 'pos');
+      const v = ln.v < 0 ? money(ln.v, ln.cents) : money(ln.v, ln.cents);
+      return `<div class="ln ${cls}" style="animation-delay:${i * 70}ms"><span>${ln.t}</span><span>${v}</span></div>`;
+    }).join('');
+    const busted = state.cash < 0;
+    const last = state.day >= DAYS;
+    const stampTxt = skipped ? 'CLOSED' : (net >= 0 ? 'PROFIT' : 'LOSS');
+    $('#stage').innerHTML = `
+      <div class="ledger-wrap">
+        <div class="receipt">
+          <h3>WAREHOUSE BAY 4</h3>
+          <div class="sub">Day ${state.day} of ${DAYS}</div>
+          <div class="stamp ${net >= 0 ? 'pos' : 'neg'}">${stampTxt}</div>
+          ${body}
+          <div class="rule"></div>
+          <div class="ln big ${net >= 0 ? 'pos' : 'neg'}"><span>Day net</span><span>${signed(net)}</span></div>
+          <div class="ln big"><span>Cash on hand</span><span>${money(state.cash)}</span></div>
+        </div>
+        <div class="side">
+          <div>
+            <div class="eyebrow">${busted ? 'Game over' : last ? 'That\'s the week' : 'End of day ' + state.day}</div>
+            <h2 style="font-size:clamp(1.7rem,4.5vw,2.4rem);margin-top:6px">${headline(net, skipped, busted)}</h2>
+          </div>
+          ${state.event ? `<div class="sticky-note"><small>Overnight</small>${state.event.text}</div>` : ''}
+          <button class="btn hot" id="next">${busted || last ? 'See how you did' : 'Next morning'}</button>
+        </div>
+      </div>`;
+    $('#next').onclick = () => {
+      if (busted || last) { state.phase = 'end'; render(); }
+      else { state.day += 1; newDay(); }
+    };
+  }
+
+  function headline(net, skipped, busted) {
+    if (busted) return 'The landlord changed the locks.';
+    if (skipped) return 'A quiet day. The rent didn\'t take one off.';
+    if (net > 400) return 'You should probably quit your day job.';
+    if (net > 150) return 'Now that\'s a flip.';
+    if (net > 0) return 'Green is green.';
+    if (net > -100) return 'Paid to haul away someone\'s returns.';
+    return 'That pallet was a crime scene.';
+  }
+
+  /* =========================================================
+     END
+     ========================================================= */
+  function rankFor(cash) {
+    let r = RANKS[0][1];
+    for (const [min, name] of RANKS) if (cash >= min) r = name;
+    return r;
+  }
+
+  function renderEnd() {
+    const s = state.stats;
+    const busted = state.cash < 0;
+    const rank = busted ? 'Repo\'d' : rankFor(state.cash);
+    const best = loadBest();
+    const isBest = !busted && (!best || state.cash > best.cash);
+    if (isBest) saveBest({ cash: Math.round(state.cash), rank });
+    const brag = `Pallet Rip: ${busted ? 'went broke on day ' + state.day : DAYS + ' days'}, $${START_CASH} → ${money(state.cash)}. ${rank}.` +
+      (s.bestFlip ? ` Best flip: ${s.bestFlip.name} for ${money(s.bestFlip.price)}.` : '') + `\nrobertsdkyle.com/pallet`;
+    $('#stage').innerHTML = `
+      <section class="end">
+        <div class="eyebrow">${busted ? `Went broke on day ${state.day}` : `Final count after ${DAYS} days`}</div>
+        <h1>${money(state.cash)}</h1>
+        <div><span class="rank">${rank}</span></div>
+        ${isBest && best ? `<p class="note">New personal best. Old one was ${money(best.cash)}.</p>` : ''}
+        <div class="end-stats">
+          <div><small>Profit</small><b>${signed(state.cash - START_CASH)}</b></div>
+          <div><small>Pallets ripped</small><b>${s.pallets}</b></div>
+          <div><small>Jackpots found</small><b>${s.jackpots}</b></div>
+          <div><small>Dead on arrival</small><b>${s.doa}</b></div>
+          <div><small>Best flip</small><b>${s.bestFlip ? `${s.bestFlip.name}, ${money(s.bestFlip.price)}` : 'Nothing'}</b></div>
+          <div><small>Best lot</small><b>${s.bestLot ? `${s.bestLot.name}, ${signed(s.bestLot.net)}` : 'None'}</b></div>
+          <div><small>Worst lot</small><b>${s.worstLot ? `${s.worstLot.name}, ${signed(s.worstLot.net)}` : 'None'}</b></div>
+        </div>
+        <div class="row">
+          <button class="btn hot" id="again">Rent the bay again</button>
+          <button class="btn ghost" id="brag">Copy my score</button>
+        </div>
+        <pre class="copy-out" id="copy-out"></pre>
+      </section>`;
+    $('#again').onclick = startGame;
+    $('#brag').onclick = () => {
+      const out = $('#copy-out');
+      const done = msg => { $('#brag').textContent = msg; };
+      out.textContent = brag;
+      const fallback = () => {
+        out.classList.add('show');
+        const r = document.createRange(); r.selectNodeContents(out);
+        const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
+        done('Selected, copy it');
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(brag).then(() => done('Copied'), fallback);
+      } else fallback();
+    };
+  }
+
+  /* =========================================================
+     BOOT
+     ========================================================= */
+  $('#logo').onclick = e => { e.preventDefault(); state = freshState(); render(); };
+
+  function start(data) {
+    state = (data && data.state) || freshState();
+    if (state.phase === 'rip' && !state.opened) state.opened = false;
+    render();
+  }
+  if (window.claude && window.claude.hot) {
+    window.claude.hot.snapshot && window.claude.hot.snapshot(() => ({ state }));
+  }
+  if (window.claude && window.claude.hot && window.claude.hot.ready) window.claude.hot.ready(start);
+  else start((window.claude && window.claude.hot && window.claude.hot.data) || {});
+})();
+</script>
+</body>
+</html>
